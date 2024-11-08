@@ -44,6 +44,27 @@ def init_db():
         )
     ''')
 
+    # Create tables if they don't exist
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS cars (
+            id INTEGER PRIMARY KEY,
+            model TEXT NOT NULL,
+            price REAL NOT NULL,
+            mileage INTEGER NOT NULL,
+            color TEXT NOT NULL,
+            picture TEXT NOT NULL  -- Add a column for the picture URL
+        )
+    ''')
+
+    # Insert sample data for cars if the table is empty
+    cursor.execute('SELECT COUNT(*) FROM cars')
+    if cursor.fetchone()[0] == 0:
+        cursor.executemany('INSERT INTO cars (model, price, mileage, color, picture) VALUES (?, ?, ?, ?, ?)', [
+            ('Tesla Model S', 79999.99, 15000, 'Black', 'https://media.ed.edmunds-media.com/tesla/model-s/2024/oem/2024_tesla_model-s_sedan_plaid_fq_oem_1_815.jpg'),
+            ('BMW X5', 60999.99, 30000, 'White', 'https://cache.bmwusa.com/cosy.arox?pov=walkaround&brand=WBBM&vehicle=25XO&client=byoc&paint=P0300&fabric=FKPSW&sa=S01CE,S01SF,S0255,S02TB,S0302,S0319,S0322,S03AT,S03MB,S0402,S0420,S0423,S0459,S0481,S0494,S04FL,S04KR,S04T8,S04UR,S0552,S05AC,S05AS,S05DM,S0676,S06AC,S06AK,S06C4,S06CP,S06NX,S06U2,S0775&angle=30'),
+            ('Ford Mustang', 35999.99, 25000, 'Blue', 'https://i.ytimg.com/vi/lEn1jZKgXB4/sddefault.jpg')
+        ])
+
     # Insert sample data if tables are empty
     cursor.execute('SELECT COUNT(*) FROM users')
     if cursor.fetchone()[0] == 0:
@@ -98,6 +119,14 @@ def get_orders():
     ''').fetchall()
     conn.close()
     return jsonify([dict(order) for order in orders])
+
+# API endpoint to get cars
+@app.route('/api/cars', methods=['GET'])
+def get_cars():
+    conn = get_db_connection()
+    cars = conn.execute('SELECT * FROM cars').fetchall()
+    conn.close()
+    return jsonify([dict(car) for car in cars])
 
 if __name__ == '__main__':
     init_db()  # Initialize the database with tables and data

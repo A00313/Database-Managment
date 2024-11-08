@@ -1,16 +1,67 @@
 /* General body styles */
 body {
     font-family: Arial, sans-serif;
-    margin: 20px;
+    margin: 0;
+    display: flex;
     background-color: #f4f4f9;
 }
 
-/* Heading styles */
-h1, h2 {
-    color: #333;
+/* Sidebar navigation styles */
+#sidebar {
+    width: 200px;
+    background-color: #333;
+    color: white;
+    padding-top: 20px;
+    position: fixed;
+    height: 100%;
 }
 
-/* Container for data */
+#sidebar h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#sidebar ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+#sidebar ul li {
+    text-align: center;
+    margin: 10px 0;
+}
+
+#sidebar ul li a {
+    color: white;
+    text-decoration: none;
+    padding: 10px;
+    display: block;
+    font-size: 18px;
+    transition: background-color 0.3s;
+}
+
+#sidebar ul li a:hover {
+    background-color: #575757;
+}
+
+/* Main content area */
+#main-content {
+    margin-left: 220px;
+    padding: 20px;
+    width: calc(100% - 220px);
+}
+
+/* Sections to hide/show */
+.section {
+    display: none;
+}
+
+/* Show the active section */
+.section.active {
+    display: block;
+}
+
+/* Data container styles */
 .data {
     background-color: #fff;
     padding: 15px;
@@ -19,7 +70,7 @@ h1, h2 {
     margin-top: 20px;
 }
 
-/* Individual data items */
+/* Data item styles */
 .data-item {
     margin-bottom: 12px;
     padding: 10px;
@@ -49,4 +100,11 @@ button:hover {
 .error {
     color: red;
     font-weight: bold;
+}
+
+/* Image styles for cars */
+#cars .data-item img {
+    width: 100%;
+    max-width: 200px;
+    border-radius: 8px;
 }
