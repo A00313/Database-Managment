@@ -21,8 +21,39 @@
         <h1>Database API Example</h1>
 
         <div id="users" class="section">
-            <h2>Users</h2>
-            <button onclick="fetchUsers()">Fetch Users</button>
+            <h2>Home</h2>
+               <!-- Header Section -->
+            <header>
+                <div class="container">
+                    <h1>Welcome to Our API</h1>
+                    <p>Your go-to API for accessing users, products, orders, and cars data.</p>
+                    <a href="javascript:void(0);" class="cta-button" onclick="window.location.href='/api/cars'">View Cars</a>
+                </div>
+            </header>
+
+            <!-- Features Section -->
+            <section class="features">
+                <div class="container">
+                    <h2>Features</h2>
+                    <div class="feature-item">
+                        <h3>Users</h3>
+                        <p>Fetch user information from the API and manage your user data seamlessly.</p>
+                        <a href="javascript:void(0);" onclick="window.location.href='/api/users'">Explore Users</a>
+                    </div>
+                    <div class="feature-item">
+                        <h3>Products</h3>
+                        <p>Get product details, prices, and much more from our product database.</p>
+                        <a href="javascript:void(0);" onclick="window.location.href='/api/products'">Explore Products</a>
+                    </div>
+                    <div class="feature-item">
+                        <h3>Orders</h3>
+                        <p>Manage your orders and track product quantities easily with our API.</p>
+                        <a href="javascript:void(0);" onclick="window.location.href='/api/orders'">Explore Orders</a>
+                    </div>
+                </div>
+            </section>
+
+        <div id="users" class="section">
             <div id="users-data" class="data"></div>
         </div>
 
