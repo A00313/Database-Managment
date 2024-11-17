@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 import sqlite3
 from flask_cors import CORS  # Import CORS
 
@@ -149,6 +149,10 @@ def get_cars():
     cars = conn.execute('SELECT * FROM cars').fetchall()
     conn.close()
     return jsonify([dict(car) for car in cars])
+
+@app.route("/")
+def connect():
+    return render_template("index.html")
 
 if __name__ == '__main__':
     init_db()  # Initialize the database with tables and data
