@@ -1,9 +1,26 @@
-from flask import Flask, jsonify, render_template
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 import sqlite3
 from flask_cors import CORS  # Import CORS
+import random
+from datetime import datetime
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key_here'  # Required for flash messages
 CORS(app)  # Apply CORS to the entire app
+
+# Global variable to store current logged in user's login_id
+current_user_id = None
+
+# Helper function to get username from login_id
+def get_username(login_id):
+    if not login_id:
+        return None
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT username FROM login_info WHERE login_id = ?', (login_id,))
+    result = cursor.fetchone()
+    conn.close()
+    return result['username'] if result else None
 
 # Helper function to connect to the database
 def get_db_connection():
@@ -15,6 +32,67 @@ def get_db_connection():
 def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
+
+    # Create Login Info/Employee Info/Cust Info Tables
+
+    cursor.execute('''
+        DROP TABLE IF EXISTS login_info
+    ''')
+
+    cursor.execute('''
+        DROP TABLE IF EXISTS cust_info
+    ''')
+
+    cursor.execute('''
+        DROP TABLE IF EXISTS emp_info
+    ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS login_info
+        (
+        login_id VARCHAR(10),
+        username VARCHAR(20),
+        password VARCHAR(20),
+        user_type VARCHAR(5),
+        PRIMARY KEY (login_id)
+        )
+    ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS cust_info 
+        (
+        cust_id VARCHAR(10),
+        login_id VARCHAR(10), 
+        f_name VARCHAR(20),
+        l_name VARCHAR(20),
+        email VARCHAR(50),
+        phone_num VARCHAR(20),
+        birthday VARCHAR(20),
+        acct_creation_dt VARCHAR(20),
+        acct_status VARCHAR(10),
+        PRIMARY KEY (cust_id),
+        FOREIGN KEY (login_id)
+        REFERENCES login_info
+        )
+    ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS emp_info
+        (
+        emp_id VARCHAR(10),
+        login_id VARCHAR(10),
+        f_name VARCHAR(20),
+        l_name VARCHAR(20),
+        email VARCHAR(50),
+        phone_num VARCHAR(20),
+        office_hours VARCHAR(200),
+        emp_intro VARCHAR(1000),
+        emp_status VARCHAR(10),
+        PRIMARY KEY (emp_id),
+        FOREIGN KEY (login_id) REFERENCES login_info
+        )
+    ''')
+
 
     # Create tables if they don't exist
     cursor.execute('''
@@ -79,7 +157,7 @@ def init_db():
             ('Ford F-150', 55999.99, 28000, 'Black', 'https://vehicle-images.dealerinspire.com/ab52-110005802/1FTEW2KP2RKE17566/4d23121092bc21826489ad899274c080.jpg'),
             ('Hyundai Elantra', 21999.99, 15000, 'Silver', 'https://di-uploads-pod27.dealerinspire.com/patrickhyundai/uploads/2022/12/2023-Hyundai-ELANTRA_900x450.jpg'),
             ('Kia Sorento', 44999.99, 23000, 'Grey', 'https://www.speedsportlife.com/wp-content/2022/04/IMG_4020.jpg'),
-            ('Volkswagen Golf GTI', 34999.99, 19000, 'White', 'https://images.squarespace-cdn.com/content/v1/5b2437bcc3c16a6fea91cd4d/1570668346246-QQ7ZKK20OQVCCRWTU9HQ/2019-10-08+13.11.03.jpg?format=1000w'),
+            ('Volkswagen Golf GTI', 34999.99, 19000, 'White', 'https://images.squarespace-cdn.com/content/v1/5b2437bcc3c16a6fea91cd4d/1570668346247-QQ7ZKK20OQVCCRWTU9HQ/2019-10-08+13.11.03.jpg?format=1000w'),
             ('Ram 1500', 45999.99, 25000, 'Red', 'https://www.motortrend.com/uploads/sites/3/2021/07/008_2022_Ram_1500_Laramie_GT.jpg'),
             ('Acura MDX', 57999.99, 27000, 'Green', 'https://cdn.dealeraccelerate.com/ag/3/2430/198777/1920x1440/2007-acura-mdx'),
             ('Infiniti QX60', 62999.99, 18000, 'Brown', 'https://upload.wikimedia.org/wikipedia/commons/1/1c/Infiniti_QX60_%28L51%29%2C_2021%2C_right-front.jpg'),
@@ -152,7 +230,116 @@ def get_cars():
 
 @app.route("/")
 def connect():
+    if current_user_id:
+        current_user =get_username(current_user_id)
+        return render_template("index.html").replace('var currentUser = null;', f'var currentUser = "{current_user}";')
     return render_template("index.html")
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Query the database for the user
+        cursor.execute('SELECT * FROM login_info WHERE username = ? AND password = ?', 
+                      (username, password))
+        user = cursor.fetchone()
+        conn.close()
+
+        if user:
+            global current_user_id
+            current_user_id = user['login_id']
+            # Use render_template instead of file operations
+            return render_template('account.html').replace('USERNAME_PLACEHOLDER', username)
+        else:
+            # Redirect to login page with error parameter
+            return redirect('/login?error=1')
+
+    return render_template('login.html')
+
+@app.route("/logout")
+def logout():
+    global current_user_id
+    current_user_id = None
+    return redirect('/')
+
+@app.route("/register/", methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        # Get form data
+        username = request.form['username']
+        password = request.form['password']
+        f_name = request.form['f_name']
+        l_name = request.form['l_name']
+        email = request.form['email']
+        phone_num = request.form['phone_num']
+        birthday = request.form['birthday']
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        try:
+            # Check if username already exists
+            cursor.execute('SELECT * FROM login_info WHERE username = ?', (username,))
+            if cursor.fetchone() is not None:
+                return redirect('/register?error=username_exists')
+            
+            # Generate login_id (10 digit random number)
+            while True:
+                login_id = str(random.randint(1000000000, 9999999999))
+                cursor.execute('SELECT * FROM login_info WHERE login_id = ?', (login_id,))
+                if cursor.fetchone() is None:
+                    break
+            
+            # Get current date for account creation
+            acct_creation_dt = datetime.now().strftime('%Y-%m-%d')
+            
+            print(f"Inserting into login_info: {login_id}, {username}, {password}, customer")
+            # Insert into login_info table
+            cursor.execute('''
+                INSERT INTO login_info (login_id, username, password, user_type)
+                VALUES (?, ?, ?, ?)
+            ''', (login_id, username, password, 'customer'))
+            
+            # Generate customer ID (CUST + last 6 digits of login_id)
+            cust_id = 'CUST' + login_id[-6:]
+            
+            print(f"Inserting into cust_info: {cust_id}, {login_id}, {f_name}, {l_name}, {email}, {phone_num}, {birthday}, {acct_creation_dt}, active")
+            # Insert into cust_info table
+            cursor.execute('''
+                INSERT INTO cust_info (cust_id, login_id, f_name, l_name, email, phone_num, birthday, acct_creation_dt, acct_status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (cust_id, login_id, f_name, l_name, email, phone_num, birthday, acct_creation_dt, 'active'))
+            
+            conn.commit()
+            print("Database commit successful")
+            return render_template('registration_success.html')
+            
+        except Exception as e:
+            conn.rollback()
+            print(f"Error during registration: {str(e)}")
+            return redirect('/register?error=registration_failed')
+            
+        finally:
+            conn.close()
+    
+    return render_template('regist.html')
+
+@app.route("/registration_success")
+def registration_success():
+    return render_template('registration_success.html')
+
+@app.route("/account")
+def account():
+    if not current_user_id:
+        return redirect('/login')
+
+    current_user =get_username(current_user_id)
+    return render_template('account.html').replace('USERNAME_PLACEHOLDER', current_user)
 
 if __name__ == '__main__':
     init_db()  # Initialize the database with tables and data

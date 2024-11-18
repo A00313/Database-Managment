@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>API Example</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/static/styles.css">
+    <script>
+        // This variable will be replaced by Flask if user is logged in
+        var currentUser = null;
+    </script>
 </head>
 <body>
     <div id="sidebar">
@@ -14,6 +18,9 @@
             <li><a href="javascript:void(0);" onclick="showSection('products')">Products</a></li>
             <li><a href="javascript:void(0);" onclick="showSection('orders')">Orders</a></li>
             <li><a href="javascript:void(0);" onclick="showSection('cars')">Cars</a></li>
+            <li id="loginLinks">
+                <a href="/login">Login</a>
+            </li>
         </ul>
     </div>
 
@@ -26,6 +33,11 @@
                     <h1>Welcome to Our API</h1>
                     <p>Your go-to API for accessing users, products, orders, and cars data.</p>
                     <a href="javascript:void(0);" class="cta-button" onclick="showSection('cars')">View Cars</a>
+
+                    <div id="loginPrompt">
+                        <p>Please click below to login to your account</p>
+                        <a href="/login" class="login-link">Go to Login</a>
+                    </div>
                 </div>
             </header>
 
@@ -36,17 +48,22 @@
                     <div class="feature-item">
                         <h3>Users</h3>
                         <p>Fetch user information from the API and manage your user data seamlessly.</p>
-                        <a href="javascript:void(0);" onclick="window.location.href='/api/users'">Explore Users</a>
+                        <a href="/api/users">Explore Users</a>
                     </div>
                     <div class="feature-item">
                         <h3>Products</h3>
                         <p>Get product details, prices, and much more from our product database.</p>
-                        <a href="javascript:void(0);" onclick="window.location.href='/api/products'">Explore Products</a>
+                        <a href="/api/products">Explore Products</a>
                     </div>
                     <div class="feature-item">
                         <h3>Orders</h3>
-                        <p>Manage your orders and track product quantities easily with our API.</p>
-                        <a href="javascript:void(0);" onclick="window.location.href='/api/orders'">Explore Orders</a>
+                        <p>Access order history, track shipments, and manage your orders.</p>
+                        <a href="/api/orders">Explore Orders</a>
+                    </div>
+                    <div class="feature-item">
+                        <h3>Cars</h3>
+                        <p>Browse our extensive collection of cars and their specifications.</p>
+                        <a href="/api/cars">Explore Cars</a>
                     </div>
                 </div>
             </section>
@@ -78,6 +95,23 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // Check if user is logged in using the global variable
+        if (currentUser) {
+            // Update navigation links
+            document.getElementById('loginLinks').innerHTML = `
+                <a href="/account">Account</a>
+                <a href="/logout" style="margin-left: 10px;">Logout</a>
+            `;
+            
+            // Hide login prompt
+            document.getElementById('loginPrompt').style.display = 'none';
+        }
+
+        function showSection(sectionName) {
+            // Your existing showSection code
+        }
+    </script>
+    <script src="/static/script.js"></script>
 </body>
 </html>
