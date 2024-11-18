@@ -35,17 +35,17 @@ def init_db():
 
     # Create Login Info/Employee Info/Cust Info Tables
 
-    cursor.execute('''
-        DROP TABLE IF EXISTS login_info
-    ''')
+    # cursor.execute('''
+    #     DROP TABLE IF EXISTS login_info
+    # ''')
 
-    cursor.execute('''
-        DROP TABLE IF EXISTS cust_info
-    ''')
+    # cursor.execute('''
+    #     DROP TABLE IF EXISTS cust_info
+    # ''')
 
-    cursor.execute('''
-        DROP TABLE IF EXISTS emp_info
-    ''')
+    # cursor.execute('''
+    #     DROP TABLE IF EXISTS emp_info
+    # ''')
 
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS login_info
