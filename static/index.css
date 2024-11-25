@@ -3,8 +3,10 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     display: flex;
-    background-color: #f4f4f9;
+    background-color: #121212;  /* Dark background color */
+    color: white;               /* Light text color for contrast */
 }
+
 
 /* Sidebar navigation styles */
 #sidebar {
@@ -243,4 +245,10 @@ footer {
 
 footer p {
     font-size: 14px;
+}
+
+.car-image-large {
+    width: 800px;  /* Fixed width */
+    height: 400px; /* Fixed height */
+    object-fit: cover;
 }

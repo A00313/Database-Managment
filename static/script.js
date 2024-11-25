@@ -73,11 +73,11 @@ async function fetchCars() {
         if (Array.isArray(data) && data.length > 0) {
             const carsDataDiv = document.getElementById('cars-data');
             carsDataDiv.innerHTML = data.map(car => `
-                <div class="data-item">
+                <div class="data-item" onclick="viewCarDetails(${car.id})">
                     <strong>${car.model}</strong> - $${car.price}<br>
                     Mileage: ${car.mileage} miles<br>
                     Color: ${car.color}<br>
-                    <img src="${car.picture}" alt="${car.model}">
+                    <img src="${car.picture}" alt="${car.model}" class="car-image">
                 </div>
             `).join('');
         } else {
@@ -88,6 +88,41 @@ async function fetchCars() {
         document.getElementById('cars-data').innerHTML = `<p class="error">Error fetching cars: ${error.message}</p>`;
     }
 }
+// Function to view detailed car information
+async function viewCarDetails(carId) {
+    try {
+        const response = await fetch(`http://127.0.0.1:5000/api/cars/${carId}`);
+        const car = await response.json();
+
+        if (car) {
+            // Assuming you have an element where you want to display the car details
+            const carDetailsDiv = document.getElementById('car-details');
+            carDetailsDiv.innerHTML = `
+                <h2>${car.model} - $${car.price}</h2>
+                <img src="${car.picture}" alt="${car.model}" class="car-image-large">
+                <p><strong>Mileage:</strong> ${car.mileage} miles</p>
+                <p><strong>Color:</strong> ${car.color}</p>
+                <p><strong>Engine:</strong> ${car.engine}</p>
+                <p><strong>Year:</strong> ${car.year}</p>
+                <p><strong>Location:</strong> ${car.location}</p>
+                <p><strong>Description:</strong> ${car.description}</p>
+                <button onclick="closeCarDetails()">Close</button>
+            `;
+            showSection('car-details-section');  // Show the details section
+        } else {
+            alert('Car details not found.');
+        }
+    } catch (error) {
+        console.error('Error fetching car details:', error);
+        alert('Error fetching car details.');
+    }
+}
+
+// Function to close the car details and return to the main cars list
+function closeCarDetails() {
+    showSection('cars');  // Go back to the cars list
+}
+
 
 // Function to show and hide sections
 function showSection(section) {
@@ -95,6 +130,7 @@ function showSection(section) {
     sections.forEach(s => s.classList.remove('active'));
     document.getElementById(section).classList.add('active');
 }
+
 
 // Initialize with Users section visible
 window.onload = () => {
