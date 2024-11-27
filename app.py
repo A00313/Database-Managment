@@ -300,12 +300,10 @@ def login():
                        (username, password))
         user = cursor.fetchone()
         conn.close()
-
         if user:
             global current_user_id
             current_user_id = user['login_id']
-            # Use render_template instead of file operations
-            return render_template('account.html').replace('USERNAME_PLACEHOLDER', username)
+            return redirect('/account')
         else:
             # Redirect to login page with error parameter
             return redirect('/login?error=1')
@@ -395,8 +393,85 @@ def account():
     if not current_user_id:
         return redirect('/login')
 
-    current_user = get_username(current_user_id)
-    return render_template('account.html').replace('USERNAME_PLACEHOLDER', current_user)
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Get user information from both tables
+    cursor.execute('''
+        SELECT li.username, ci.f_name, ci.l_name, ci.email, ci.phone_num, ci.birthday
+        FROM login_info li
+        JOIN cust_info ci ON li.login_id = ci.login_id
+        WHERE li.login_id = ?
+    ''', (current_user_id,))
+    
+    row = cursor.fetchone()
+    conn.close()
+    
+    if row:
+        user_info = {
+            'username': row['username'],
+            'f_name': row['f_name'],
+            'l_name': row['l_name'],
+            'email': row['email'],
+            'phone_num': row['phone_num'],
+            'birthday': row['birthday']
+        }
+        # Get message from query parameter if it exists
+        message = request.args.get('message', '')
+        message_type = request.args.get('message_type', '')
+        return render_template('account.html', user_info=user_info, message=message, message_type=message_type)
+    return redirect('/login')
+
+
+@app.route("/update_account", methods=['POST'])
+def update_account():
+    if not current_user_id:
+        return redirect('/login')
+    
+    # Get form data
+    current_password = request.form.get('current_password')
+    new_password = request.form.get('password')
+    f_name = request.form['f_name']
+    l_name = request.form['l_name']
+    email = request.form['email']
+    phone_num = request.form['phone_num']
+    birthday = request.form['birthday']
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # Verify current password
+        cursor.execute('SELECT password FROM login_info WHERE login_id = ?', (current_user_id,))
+        stored_password = cursor.fetchone()['password']
+        
+        if not stored_password or stored_password != current_password:
+            return redirect('/account?message=Incorrect current password. No changes were made.&message_type=error')
+        
+        # Update customer information
+        cursor.execute('''
+            UPDATE cust_info 
+            SET f_name = ?, l_name = ?, email = ?, phone_num = ?, birthday = ?
+            WHERE login_id = ?
+        ''', (f_name, l_name, email, phone_num, birthday, current_user_id))
+        
+        # Update password if a new one is provided
+        if new_password and new_password.strip():
+            cursor.execute('''
+                UPDATE login_info 
+                SET password = ?
+                WHERE login_id = ?
+            ''', (new_password, current_user_id))
+        
+        conn.commit()
+        return redirect('/account?message=Your information has been updated successfully!&message_type=success')
+    except Exception as e:
+        conn.rollback()
+        return redirect('/account?message=An error occurred while updating your information.&message_type=error')
+    finally:
+        conn.close()
+    
+    return redirect('/account')
 
 
 if __name__ == '__main__':
