@@ -63,8 +63,7 @@ async function fetchOrders() {
         document.getElementById('orders-data').innerHTML = `<p class="error">Error fetching orders: ${error.message}</p>`;
     }
 }
-
-// Function to handle fetching cars
+// Function to handle fetching cars and checking if they are on sale
 async function fetchCars() {
     try {
         const response = await fetch('http://127.0.0.1:5000/api/cars');
@@ -72,17 +71,43 @@ async function fetchCars() {
         
         if (Array.isArray(data) && data.length > 0) {
             const carsDataDiv = document.getElementById('cars-data');
-            carsDataDiv.innerHTML = data.map(car => `
-                <div class="data-item" onclick="viewCarDetails('${car.veh_id}')">
-                    <strong>${car.veh_name}</strong> - $${car.price}<br>
-                    Mileage: ${car.mileage} miles<br>
-                    Color: ${car.ext_color}<br>
-                    Condition: ${car.condition}<br>
-                    Year: ${car.year}<br>
-                    Location: ${car.location}<br>
-                    <img src="${car.image_url}" alt="${car.veh_name}" class="car-image">
-                </div>
-            `).join('');
+
+            // Use map and await the results before joining
+            const carItems = await Promise.all(data.map(async car => {
+                let salePrice = null;
+                let oldPrice = car.price;  // Default to original price
+                try {
+                    const saleResponse = await fetch(`http://127.0.0.1:5000/api/car_sale/${car.veh_inv_id}`);
+                    const saleData = await saleResponse.json();
+
+                    if (saleData.campaign_price) {
+                        salePrice = saleData.campaign_price;  // If there's a sale, use the campaign price
+                        oldPrice = car.price;  // Keep the original price if there's a sale
+                    } else {
+                        console.log(`No active sale for ${car.veh_inv_id}`);
+                    }
+                } catch (error) {
+                    console.log(`Error fetching sale data for ${car.veh_inv_id}: ${error}`);
+                }
+
+                // Return the car's HTML content with the correct price (with old price struck through and sale price in red if on sale)
+                return `
+                    <div class="data-item" onclick="viewCarDetails('${car.veh_id}', '${car.veh_inv_id}')">
+                        <strong>${car.veh_name}</strong><br>
+                        ${salePrice ? `<span class="old-price" style="text-decoration: line-through; color: grey;">$${oldPrice.toFixed(2)}</span> ` : ''}
+                        <span class="${salePrice ? 'sale-price' : ''}" style="${salePrice ? 'color: red;' : ''}">$${salePrice ? salePrice.toFixed(2) : oldPrice.toFixed(2)}</span><br>
+                        Mileage: ${car.mileage} miles<br>
+                        Color: ${car.ext_color}<br>
+                        Condition: ${car.condition}<br>
+                        Year: ${car.year}<br>
+                        Location: ${car.location}<br>
+                        <img src="${car.image_url}" alt="${car.veh_name}" class="car-image">
+                    </div>
+                `;
+            }));
+
+            // Join the array of car HTML elements into a single string and set the innerHTML
+            carsDataDiv.innerHTML = carItems.join('');
         } else {
             document.getElementById('cars-data').innerHTML = '<p>No cars found.</p>';
         }
@@ -93,16 +118,37 @@ async function fetchCars() {
 }
 
 // Function to view detailed car information
-async function viewCarDetails(carId) {
+async function viewCarDetails(carId, carInvId) {
     try {
         const response = await fetch(`http://127.0.0.1:5000/api/cars/${carId}`);
         const car = await response.json();
 
         if (car) {
-            // Assuming you have an element where you want to display the car details
+            // Check if the car has a sale price
+            let salePrice = car.price;
+            let originalPrice = car.price;  // Default to regular price
+            let salePriceHtml = '';  // HTML to display sale price if applicable
+            let oldPriceHtml = '';  // HTML to display original price with strikethrough if on sale
+
+            try {
+                const saleResponse = await fetch(`http://127.0.0.1:5000/api/car_sale/${carInvId}`);
+                const saleData = await saleResponse.json();
+
+                if (saleData.campaign_price) {
+                    salePrice = saleData.campaign_price;  // Use the sale price if available
+                    oldPriceHtml = `<span class="old-price" style="text-decoration: line-through; color: grey;">$${originalPrice.toFixed(2)}</span>`;  // Strikethrough the original price
+                    salePriceHtml = `<span class="sale-price" style="color: red;">$${salePrice.toFixed(2)}</span>`;  // Display sale price in red
+                }
+            } catch (error) {
+                console.log(`No sale found for car ${carInvId}`);
+            }
+
+            // Display the car details with the updated price
             const carDetailsDiv = document.getElementById('car-details');
             carDetailsDiv.innerHTML = `
-                <h2>${car.veh_name} - $${car.price}</h2>
+                <h2>${car.veh_name} - ${salePriceHtml || `$${salePrice.toFixed(2)}`}</h2>
+                ${oldPriceHtml}  <!-- Show the original price with strikethrough if on sale -->
+                <br>
                 <img src="${car.image_url}" alt="${car.veh_name}" class="car-image-large">
                 <p><strong>Mileage:</strong> ${car.mileage} miles</p>
                 <p><strong>Color:</strong> ${car.ext_color}</p>

@@ -7,7 +7,14 @@ body {
     color: white;               /* Light text color for contrast */
 }
 
+.old-price {
+    text-decoration: line-through;
+    color: grey;
+}
 
+.sale-price {
+    color: red;
+}
 /* Sidebar navigation styles */
 #sidebar {
     width: 200px;

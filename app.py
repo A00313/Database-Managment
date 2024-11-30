@@ -145,6 +145,29 @@ def init_db():
             )
     ''')
 
+    # Create sale campaign table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS sale_camp (
+        campaign_id VARCHAR(10),
+        campaign_desc VARCHAR(2000),
+        start_dt VARCHAR(10),
+        end_dt VARCHAR(10),
+        PRIMARY KEY (campaign_id)
+        )
+    ''')
+
+    # Create sale campaign details table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS sale_camp_detailed (
+        campaign_id VARCHAR(10),
+        veh_inv_id VARCHAR(10),
+        campaign_price FLOAT(2),
+        PRIMARY KEY (campaign_id, veh_inv_id),
+        FOREIGN KEY (campaign_id) REFERENCES sale_camp,
+        FOREIGN KEY (veh_inv_id) REFERENCES veh_inv
+        )
+    ''')
+
     # Insert sample data for veh_info with new fields
     cursor.execute('SELECT COUNT(*) FROM veh_info')
     if cursor.fetchone()[0] == 0:
@@ -197,6 +220,83 @@ def init_db():
             ('INV016', 'V016', 'Used', 24000, 47999.99, 'A compact luxury sedan known for its dynamic driving experience and sophisticated interior.', 'https://www.edmunds.com/assets/m/cs/bltfd77bfe883e04cf6/66562cab0d6347db0279febf/2025_BMW_3-series_3_1600.jpg', 'New Hope, PA'),
             ('INV017', 'V017', 'Used', 28000, 55999.99, 'A powerful and versatile full-size pickup truck designed for heavy-duty tasks and off-road adventures.', 'https://vehicle-images.dealerinspire.com/ab52-110005802/1FTEW2KP2RKE17566/4d23121092bc21826489ad899274c080.jpg', 'Media, PA'),
             ('INV018', 'V018', 'Used', 15000, 21999.99, 'A compact sedan offering a modern design, advanced tech features, and great fuel economy at an affordable price.', 'https://di-uploads-pod27.dealerinspire.com/patrickhyundai/uploads/2022/12/2023-Hyundai-ELANTRA_900x450.jpg', 'Lebanon, PA')
+        ])
+
+    # Insert sample data for sale_camp
+    cursor.execute('SELECT COUNT(*) FROM sale_camp')
+    if cursor.fetchone()[0] == 0:
+        cursor.executemany('''
+        INSERT INTO sale_camp (campaign_id, campaign_desc, start_dt, end_dt)
+        VALUES (?, ?, ?, ?)
+    ''', [
+            ('BF2024', 'Black Friday Sale - Huge discounts on all vehicles.', '2024-11-29', '2024-12-02'),
+            ('MD2024', 'Memorial Day Sale - Save big on top models this Memorial Day.', '2024-05-25', '2024-05-28'),
+            ('TG2024', 'Thanksgiving Sale - Special offers on luxury and family cars.', '2024-11-22', '2024-11-25')
+        ])
+
+        # Insert sample data for sale_camp
+    cursor.execute('SELECT COUNT(*) FROM sale_camp_detailed')
+    if cursor.fetchone()[0] == 0:
+        cursor.executemany('''
+        INSERT INTO sale_camp_detailed (campaign_id, veh_inv_id, campaign_price)
+            VALUES (?, ?, ?)
+        ''', [
+            # Black Friday Sale
+            ('BF2024', 'INV001', 79999.99 * 0.90),  # 10% off
+            ('BF2024', 'INV002', 60999.99 * 0.90),
+            ('BF2024', 'INV003', 35999.99 * 0.90),
+            ('BF2024', 'INV004', 45999.99 * 0.90),
+            ('BF2024', 'INV006', 55999.99 * 0.90),
+            ('BF2024', 'INV007', 23999.99 * 0.90),
+            ('BF2024', 'INV008', 27999.99 * 0.90),
+            ('BF2024', 'INV009', 28999.99 * 0.90),
+            ('BF2024', 'INV010', 70999.99 * 0.90),
+            ('BF2024', 'INV011', 60999.99 * 0.90),
+            ('BF2024', 'INV012', 99999.99 * 0.90),
+            ('BF2024', 'INV013', 35999.99 * 0.90),
+            ('BF2024', 'INV014', 37999.99 * 0.90),
+            ('BF2024', 'INV015', 42999.99 * 0.90),
+            ('BF2024', 'INV016', 47999.99 * 0.90),
+            ('BF2024', 'INV017', 55999.99 * 0.90),
+            ('BF2024', 'INV018', 21999.99 * 0.90),
+
+            # Memorial Day Sale
+            ('MD2024', 'INV001', 79999.99 * 0.95),  # 5% off
+            ('MD2024', 'INV002', 60999.99 * 0.95),
+            ('MD2024', 'INV003', 35999.99 * 0.95),
+            ('MD2024', 'INV004', 45999.99 * 0.95),
+            ('MD2024', 'INV006', 55999.99 * 0.95),
+            ('MD2024', 'INV007', 23999.99 * 0.95),
+            ('MD2024', 'INV008', 27999.99 * 0.95),
+            ('MD2024', 'INV009', 28999.99 * 0.95),
+            ('MD2024', 'INV010', 70999.99 * 0.95),
+            ('MD2024', 'INV011', 60999.99 * 0.95),
+            ('MD2024', 'INV012', 99999.99 * 0.95),
+            ('MD2024', 'INV013', 35999.99 * 0.95),
+            ('MD2024', 'INV014', 37999.99 * 0.95),
+            ('MD2024', 'INV015', 42999.99 * 0.95),
+            ('MD2024', 'INV016', 47999.99 * 0.95),
+            ('MD2024', 'INV017', 55999.99 * 0.95),
+            ('MD2024', 'INV018', 21999.99 * 0.95),
+
+            # Thanksgiving Sale
+            ('TG2024', 'INV001', 79999.99 * 0.85),  # 15% off
+            ('TG2024', 'INV002', 60999.99 * 0.85),
+            ('TG2024', 'INV003', 35999.99 * 0.85),
+            ('TG2024', 'INV004', 45999.99 * 0.85),
+            ('TG2024', 'INV006', 55999.99 * 0.85),
+            ('TG2024', 'INV007', 23999.99 * 0.85),
+            ('TG2024', 'INV008', 27999.99 * 0.85),
+            ('TG2024', 'INV009', 28999.99 * 0.85),
+            ('TG2024', 'INV010', 70999.99 * 0.85),
+            ('TG2024', 'INV011', 60999.99 * 0.85),
+            ('TG2024', 'INV012', 99999.99 * 0.85),
+            ('TG2024', 'INV013', 35999.99 * 0.85),
+            ('TG2024', 'INV014', 37999.99 * 0.85),
+            ('TG2024', 'INV015', 42999.99 * 0.85),
+            ('TG2024', 'INV016', 47999.99 * 0.85),
+            ('TG2024', 'INV017', 55999.99 * 0.85),
+            ('TG2024', 'INV018', 21999.99 * 0.85)
         ])
 
 
@@ -267,7 +367,7 @@ def get_cars():
     conn = get_db_connection()
     # Fetch all car details from veh_info and veh_inv tables, joining on veh_id
     query = '''
-    SELECT veh_info.veh_id, veh_info.veh_name, veh_info.ext_color, veh_info.horsepower, veh_info.mileage, 
+    SELECT veh_inv.veh_inv_id, veh_info.veh_id, veh_info.veh_name, veh_info.ext_color, veh_info.horsepower, veh_info.mileage, 
         veh_inv.condition, veh_inv.price, veh_inv.inventory_count, veh_inv.special_notes, veh_inv.image_url,
         veh_info.year, veh_inv.location
     FROM veh_info
@@ -297,6 +397,39 @@ def get_car_details(car_id):
         return jsonify(dict(car))
     else:
         return jsonify({'error': 'Car not found'}), 404
+    
+# Endpoint to check if a vehicle is on sale
+@app.route('/api/car_sale/<string:veh_inv_id>', methods=['GET'])
+def get_vehicle_sale(veh_inv_id):
+    try:
+        conn = get_db_connection()
+        current_date = datetime.now().strftime('%Y-%m-%d')
+
+        # Check if the vehicle is on sale and fetch the sale price
+        sale_info = conn.execute('''
+            SELECT d.campaign_price 
+            FROM sale_camp s
+            JOIN sale_camp_detailed d ON s.campaign_id = d.campaign_id
+            WHERE d.veh_inv_id = ? AND s.start_dt <= ? AND s.end_dt >= ?
+        ''', (veh_inv_id, current_date, current_date)).fetchone()
+
+        conn.close()
+
+        if sale_info:
+            return jsonify({
+                'veh_inv_id': veh_inv_id,
+                'campaign_price': sale_info['campaign_price'],
+                'message': 'Vehicle is on sale'
+            })
+        else:
+            # No active sale, return price as normal
+            return jsonify({
+                'veh_inv_id': veh_inv_id,
+                'message': 'No active sale for this vehicle'
+            })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 @app.route("/")
