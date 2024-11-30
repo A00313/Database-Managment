@@ -630,6 +630,58 @@ def update_account():
 
     return redirect('/account')
 
+@app.route('/api/cars/search', methods=['GET'])
+def search_cars():
+    query = request.args.get('query', '').lower()  # Get the search query
+    year = request.args.get('year', '')  # Get the year filter
+    price_range = request.args.get('price_range', '')  # Get the price range filter
+
+    # If there's no query, year, or price range, return empty result
+    if not query and not year and not price_range:
+        return jsonify([])
+
+    # Build the SQL query for partial matching with optional filters
+    query_str = '''
+        SELECT veh_info.veh_id, veh_info.veh_name, veh_info.year, veh_inv.price, veh_inv.image_url,
+               veh_info.ext_color, veh_info.horsepower, veh_inv.condition,
+               sale_camp_detailed.campaign_price AS sale_price
+        FROM veh_info
+        LEFT JOIN veh_inv ON veh_info.veh_id = veh_inv.veh_id
+        LEFT JOIN sale_camp_detailed ON veh_inv.veh_id = sale_camp_detailed.veh_inv_id AND sale_camp_detailed.campaign_price IS NOT NULL
+        WHERE LOWER(veh_info.veh_name) LIKE ?
+    '''
+
+    # Add the year filter if provided
+    if year:
+        query_str += ' AND veh_info.year = ?'
+
+    # Add the price range filter if provided
+    if price_range:
+        # Parse the price range into min and max price
+        min_price, max_price = price_range.split('-')
+        if max_price:
+            query_str += ' AND veh_inv.price BETWEEN ? AND ?'
+        else:
+            query_str += ' AND veh_inv.price < ?'
+
+    query_str += ' LIMIT 5'  # Limit to top 5 results
+
+    # Execute the query with the search term, optional year, and price range filter
+    conn = get_db_connection()
+    if year and price_range:
+        cars = conn.execute(query_str, ('%' + query + '%', year, min_price, max_price)).fetchall()
+    elif year:
+        cars = conn.execute(query_str, ('%' + query + '%', year)).fetchall()
+    elif price_range:
+        cars = conn.execute(query_str, ('%' + query + '%', min_price, max_price)).fetchall()
+    else:
+        cars = conn.execute(query_str, ('%' + query + '%',)).fetchall()
+    conn.close()
+
+    # Return the cars in JSON format
+    return jsonify([dict(car) for car in cars])
+
+
 
 if __name__ == '__main__':
     init_db()  # Initialize the database with tables and data

@@ -259,3 +259,108 @@ footer p {
     height: 400px; /* Fixed height */
     object-fit: cover;
 }
+
+/* Search Bar */
+#search-bar {
+    background-color: #fff;
+    padding: 20px;
+    margin: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+#search-bar input,
+#search-bar select,
+#search-bar button {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+    width: 200px;
+}
+
+#search-bar button {
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+}
+
+#search-bar button:hover {
+    background-color: #45a049;
+}
+
+#search-bar input {
+    width: 250px;
+}
+
+/* Car Cards */
+#car-results {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+    justify-content: center;
+}
+
+.data-item {
+    background-color: white;
+    width: 250px;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.data-item:hover {
+    transform: scale(1.05);
+}
+
+.data-item img {
+    width: 100%;
+    height: auto;
+    max-height: 150px;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+.data-item h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.data-item p {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.old-price {
+    text-decoration: line-through;
+    color: grey;
+}
+
+.sale-price {
+    color: red;
+    font-weight: bold;
+}
+
+.clear-btn {
+    display: inline-block;
+    background-color: #f44336;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.clear-btn:hover {
+    background-color: #e53935;
+}

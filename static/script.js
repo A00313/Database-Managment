@@ -63,8 +63,13 @@ async function fetchOrders() {
         document.getElementById('orders-data').innerHTML = `<p class="error">Error fetching orders: ${error.message}</p>`;
     }
 }
-// Function to handle fetching cars and checking if they are on sale
+// Track the current page state
+let currentPage = 'fetch-cars'; // Default page
+
+// Function to handle fetching cars
 async function fetchCars() {
+    currentPage = 'fetch-cars';  // Track that we're on the "fetch cars" page
+
     try {
         const response = await fetch('http://127.0.0.1:5000/api/cars');
         const data = await response.json();
@@ -94,6 +99,7 @@ async function fetchCars() {
                 return `
                     <div class="data-item" onclick="viewCarDetails('${car.veh_id}', '${car.veh_inv_id}')">
                         <strong>${car.veh_name}</strong><br>
+                        <img src="${car.image_url}" alt="${car.veh_name}" class="car-image">
                         ${salePrice ? `<span class="old-price" style="text-decoration: line-through; color: grey;">$${oldPrice.toFixed(2)}</span> ` : ''}
                         <span class="${salePrice ? 'sale-price' : ''}" style="${salePrice ? 'color: red;' : ''}">$${salePrice ? salePrice.toFixed(2) : oldPrice.toFixed(2)}</span><br>
                         Mileage: ${car.mileage} miles<br>
@@ -101,7 +107,7 @@ async function fetchCars() {
                         Condition: ${car.condition}<br>
                         Year: ${car.year}<br>
                         Location: ${car.location}<br>
-                        <img src="${car.image_url}" alt="${car.veh_name}" class="car-image">
+                        
                     </div>
                 `;
             }));
@@ -169,14 +175,94 @@ async function viewCarDetails(carId, carInvId) {
     }
 }
 
-// Function to close the car details and return to the main cars list
-function closeCarDetails() {
-    showSection('cars');  // Go back to the cars list
+// Function to handle search cars
+async function searchCars() {
+    currentPage = 'products';  // Track that we're on the "search cars" page
+
+    const query = document.getElementById('search-query').value.trim().toLowerCase();
+    const selectedYear = document.getElementById('year-filter').value;
+    const selectedPriceRange = document.getElementById('price-filter').value;
+
+    const carResultsDiv = document.getElementById('car-results');
+    carResultsDiv.innerHTML = '';  // Clear current car list
+
+    if (query === '' && selectedYear === '' && selectedPriceRange === '') {
+        carResultsDiv.innerHTML = '<p>Please enter a search term or select filters.</p>';
+        return;
+    }
+
+    try {
+        const response = await fetch(`http://127.0.0.1:5000/api/cars/search?query=${encodeURIComponent(query)}&year=${encodeURIComponent(selectedYear)}&price_range=${encodeURIComponent(selectedPriceRange)}`);
+        const cars = await response.json();
+
+        if (cars.length > 0) {
+            displayCars(cars);
+        } else {
+            carResultsDiv.innerHTML = '<p>No cars found matching your query.</p>';
+        }
+    } catch (error) {
+        console.error('Error fetching cars:', error);
+        carResultsDiv.innerHTML = '<p>Error fetching cars. Please try again later.</p>';
+    }
 }
 
+// Function to display car cards
+function displayCars(cars) {
+    const carResultsDiv = document.getElementById('car-results');
+    carResultsDiv.innerHTML = cars.slice(0, 5).map(car => {
+        let salePriceHtml = '';
+        let oldPriceHtml = '';
+
+        if (car.sale_price) {
+            salePriceHtml = `<span class="sale-price" style="color: red;">$${car.sale_price.toFixed(2)}</span>`;
+            oldPriceHtml = `<span class="old-price" style="text-decoration: line-through; color: grey;">$${car.price.toFixed(2)}</span>`;
+        } else {
+            salePriceHtml = `$${car.price.toFixed(2)}`;
+        }
+
+        return `
+            <div class="data-item" onclick="viewCarDetails('${car.veh_id}', '${car.veh_inv_id}')">
+                <img src="${car.image_url}" alt="${car.veh_name}">
+                <h3>${car.veh_name}</h3>
+                ${oldPriceHtml}
+                <p>${salePriceHtml}</p>
+                <p>Mileage: ${car.mileage} miles</p>
+                <p>Year: ${car.year}</p>
+                <p>Color: ${car.ext_color}</p>
+                <p>Horsepower: ${car.horsepower} hp</p>
+            </div>
+        `;
+    }).join('');
+}
+
+// Function to clear search input and filters
+function clearSearch() {
+    document.getElementById('search-query').value = '';
+    document.getElementById('year-filter').value = '';
+    document.getElementById('price-filter').value = '';
+    document.getElementById('car-results').innerHTML = '';
+}
+
+// Function to close the car details and return to the correct list
+function closeCarDetails() {
+
+    if (currentPage === 'products') {
+        showSection('products');  // Go back to the products page
+    }
+    else {
+        showSection('cars');  // Go back to the fetch cars page
+    }
+}
 
 // Function to show and hide sections
 function showSection(section) {
+    console.log(`Showing section: ${section}`);
+    if (section === "products") {
+        currentPage = 'products';
+    }
+    if (section === "cars") {
+        currentPage = 'cars';
+    }
     const sections = document.querySelectorAll('.section');
     sections.forEach(s => s.classList.remove('active'));
     document.getElementById(section).classList.add('active');
