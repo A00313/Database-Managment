@@ -104,6 +104,48 @@ def init_db():
         DROP TABLE IF EXISTS veh_inv
     ''')
 
+    cursor.execute('''
+        DROP TABLE IF EXISTS emp_info
+    ''')
+
+    # Create employee information table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS emp_info
+        (
+        emp_id VARCHAR(10),
+        f_name VARCHAR(20),
+        l_name VARCHAR(20),
+        email VARCHAR(50),
+        phone_num VARCHAR(20),
+        office_hours VARCHAR(200),
+        emp_intro VARCHAR(1000),
+        emp_status VARCHAR(10),
+        pic_url VARCHAR(200),
+        PRIMARY KEY (emp_id)
+        )
+    ''')
+
+    # Insert sample data for emp_info
+    cursor.execute('SELECT COUNT(*) FROM emp_info')
+    if cursor.fetchone()[0] == 0:
+        cursor.executemany('''
+            INSERT INTO emp_info (emp_id, f_name, l_name, email, phone_num, office_hours, emp_intro, emp_status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', [('emp0', 'online', 'online', 'online@example.com', '123-456-7890', 'N/A', 'This is for online sales', 'active')
+              ('emp1', 'John', 'Doe', 'JohnDoe@example.com', '123-456-7890', 'Mon-Fri: 9am-5pm', 
+              "John Doe brings years of expertise and a passion for cars to every customer interaction. Whether you’re searching for the latest models or a dependable pre-owned vehicle, John is dedicated to finding the right fit for your lifestyle and budget. Known for his straightforward advice and exceptional customer care, John ensures a hassle-free buying experience from start to finish.", 'active',
+              'https://media.gettyimages.com/id/1919265357/photo/close-up-portrait-of-confident-businessman-standing-in-office.jpg?s=2048x2048&w=gi&k=20&c=Y0-O4sl85iNuYPC9U4PEagLOOuGOC0xHWnhR_YOSJYk='),
+              ('emp2', 'Jane', 'Smith', 'JaneSmith@example.com', '987-654-3210', 'Mon-Fri: 11am-8pm', 
+              "With over a decade of experience, Jane Smith is dedicated to helping you find the perfect car for your needs and budget. Known for her friendly approach and expert knowledge, she creates a stress-free, transparent buying experience. Whether you’re after a brand-new model or a reliable pre-owned vehicle, Jane ensures you drive away happy.", 'active',
+              'https://media.gettyimages.com/id/945061408/photo/portrait-of-beautiful-young-businesswoman.jpg?s=2048x2048&w=gi&k=20&c=GRrW26Eu7NE23TsmZJNinnn-EqL-G2EpdHti6qS2Xh8='),
+              ('emp3', 'Bob', 'Johnson', 'BobJohnson@example.com', '555-555-5555', 'Mon-Fri: 12PM-5pm', 
+              "Bob Johnson is a knowledgeable and approachable car specialist with a passion for matching people with the perfect vehicle. With a focus on understanding your unique needs, Bob provides honest advice and ensures a smooth, enjoyable car-buying experience. Whether it’s a sleek sedan, a rugged truck, or anything in between, Bob is here to guide you every step of the way.", 'active',
+              'https://media.gettyimages.com/id/1179420343/photo/smiling-man-outdoors-in-the-city.jpg?s=2048x2048&w=gi&k=20&c=A5rKi_wYh0EL2Xv3GHSIzEwG9TyralNq_CjoSXIzfb8='),
+              ('emp4', 'Alice', 'Williams', 'AliceWilliams@example.com', '111-222-3333', 'Mon-Fri: 8am-3pm', 
+              "Alice Williams is dedicated to making your car-buying journey simple, enjoyable, and stress-free. With her deep industry knowledge and a knack for understanding her customers' needs, Alice takes the time to find the perfect car for your lifestyle and budget. From first-time buyers to seasoned drivers, she offers personalized guidance every step of the way. ", 'active',
+              'https://media.gettyimages.com/id/831902150/photo/ive-solidified-my-name-in-the-business-world.jpg?s=2048x2048&w=gi&k=20&c=zajbxqgcyLEhKdhwwHo0bHIcsyP0WEEefTsZnxSfe14=')
+        ])
+
     # Create vehicle information table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS veh_info (
