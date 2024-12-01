@@ -168,6 +168,20 @@ def init_db():
         )
     ''')
 
+    # Create sale campaign details table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS purchases (
+            transaction_id SERIAL PRIMARY KEY,
+            user_id INT NOT NULL,
+            car_id INT NOT NULL,
+            price DECIMAL(10, 2) NOT NULL,
+            payment_status VARCHAR(50) DEFAULT 'pending',
+            transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (car_id) REFERENCES cars(veh_id),
+            FOREIGN KEY (user_id) REFERENCES users(user_id)
+        );
+    ''')
+
     # Insert sample data for veh_info with new fields
     cursor.execute('SELECT COUNT(*) FROM veh_info')
     if cursor.fetchone()[0] == 0:
@@ -681,6 +695,129 @@ def search_cars():
     # Return the cars in JSON format
     return jsonify([dict(car) for car in cars])
 
+@app.route('/api/process_payment', methods=['POST'])
+def process_payment():
+    try:
+        # Get the payment data from the request
+        payment_data = request.get_json()
+
+        car_id = payment_data.get('car_id')
+        user_id = payment_data.get('user_id')
+        price = payment_data.get('price')
+        credit_card = payment_data.get('credit_card')
+        expiration = payment_data.get('expiration')
+        cvv = payment_data.get('cvv')
+
+        # Validate input (you might want to add more checks here)
+        if not car_id or not user_id or not price or not credit_card or not expiration or not cvv:
+            return jsonify({"success": False, "message": "Missing payment information"}), 400
+
+        # Process the payment here (e.g., call an external payment API or simulate success)
+        # For this example, we'll assume the payment was successful.
+
+        # Add transaction record to database (replace this with your actual DB logic)
+        transaction_id = "12345"  # Simulate transaction ID
+
+        # Update inventory to remove car after purchase (this part will depend on your DB setup)
+        # Ensure car exists in inventory before deleting it
+        delete_car_from_inventory(car_id)
+
+        return jsonify({"success": True, "transaction_id": transaction_id}), 200
+
+    except Exception as e:
+        # Log the error and return a generic failure response
+        print(f"Error during payment processing: {e}")
+        return jsonify({"success": False, "message": "Payment processing failed"}), 500
+
+import sqlite3  # Assuming you're using SQLite, replace with your actual DB module if needed
+
+def delete_car_from_inventory(veh_inv_id):
+    try:
+        # Step 1: Connect to the database
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Step 2: Check if the vehicle exists in the inventory
+        cursor.execute('SELECT * FROM veh_inv WHERE veh_inv_id = ?', (veh_inv_id,))
+        car = cursor.fetchone()
+
+        if car is None:
+            # If the car doesn't exist, return an error message
+            print(f"Vehicle with ID {veh_inv_id} does not exist in the inventory.")
+            return False  # Car not found
+
+        # Step 3: If the car exists, delete it from the inventory
+        cursor.execute('DELETE FROM veh_inv WHERE veh_inv_id = ?', (veh_inv_id,))
+        conn.commit()
+
+        # Step 4: Success message
+        print(f"Vehicle with ID {veh_inv_id} has been removed from inventory.")
+        return True  # Car successfully deleted
+
+    except sqlite3.Error as e:
+        # Handle any database-related errors
+        print(f"Error while deleting vehicle with ID {veh_inv_id}: {e}")
+        return False  # Return False if there was an error
+
+    finally:
+        # Step 5: Close the database connection
+        conn.close()
+
+
+@app.route('/confirmation')
+def confirmation():
+    # Get the transaction_id from the query parameters
+    transaction_id = request.args.get('transaction_id')
+
+    # Ensure we have a valid transaction ID
+    if transaction_id:
+        # You can render a confirmation page and pass the transaction ID to it
+        return render_template('confirmation.html', transaction_id=transaction_id)
+    else:
+        # If no transaction_id is found, show an error message
+        return 'Error: Transaction ID not found.', 400
+    
+@app.route('/api/complete_purchase', methods=['POST'])
+def complete_purchase():
+    try:
+        # Get the request data
+        data = request.get_json()
+
+        car_id = data['car_id']
+        user_id = data['user_id']
+        price = data['price']
+        credit_card = data['credit_card']
+        expiration = data['expiration']
+        cvv = data['cvv']
+
+        # Simulate payment processing here (you can use a real payment gateway like Stripe or another service)
+
+        # Assuming payment was successful, create a transaction record
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO purchases (car_id, user_id, price, credit_card, expiration, cvv, transaction_date)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (car_id, user_id, price, credit_card, expiration, cvv, datetime.now()))
+        conn.commit()
+        transaction_id = cursor.lastrowid
+        conn.close()
+
+        # Respond with success
+        return jsonify({'success': True, 'transaction_id': transaction_id})
+
+    except Exception as e:
+        print("Error processing payment:", e)
+        return jsonify({'success': False, 'message': 'Payment failed. Please try again.'}), 500
+
+
+@app.route('/payment')
+def payment():
+    return render_template('payment.html')
+
+@app.route('/home')
+def home():
+    return render_template('index.html')
 
 
 if __name__ == '__main__':

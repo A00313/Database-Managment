@@ -81,11 +81,15 @@ async function fetchCars() {
             const carItems = await Promise.all(data.map(async car => {
                 let salePrice = null;
                 let oldPrice = car.price;  // Default to original price
+
+                // Ensure price is valid before continuing
+                const isValidPrice = (price) => !isNaN(price) && price !== null && price !== undefined;
+
                 try {
                     const saleResponse = await fetch(`http://127.0.0.1:5000/api/car_sale/${car.veh_inv_id}`);
                     const saleData = await saleResponse.json();
 
-                    if (saleData.campaign_price) {
+                    if (saleData.campaign_price && isValidPrice(saleData.campaign_price)) {
                         salePrice = saleData.campaign_price;  // If there's a sale, use the campaign price
                         oldPrice = car.price;  // Keep the original price if there's a sale
                     } else {
@@ -95,19 +99,21 @@ async function fetchCars() {
                     console.log(`Error fetching sale data for ${car.veh_inv_id}: ${error}`);
                 }
 
-                // Return the car's HTML content with the correct price (with old price struck through and sale price in red if on sale)
+                // Ensure salePrice and oldPrice are valid before using `toFixed`
+                const displayPrice = isValidPrice(salePrice) ? salePrice : (isValidPrice(oldPrice) ? oldPrice : 0);
+
+                // Return the car's HTML content with the correct price
                 return `
                     <div class="data-item" onclick="viewCarDetails('${car.veh_id}', '${car.veh_inv_id}')">
                         <strong>${car.veh_name}</strong><br>
                         <img src="${car.image_url}" alt="${car.veh_name}" class="car-image">
-                        ${salePrice ? `<span class="old-price" style="text-decoration: line-through; color: grey;">$${oldPrice.toFixed(2)}</span> ` : ''}
-                        <span class="${salePrice ? 'sale-price' : ''}" style="${salePrice ? 'color: red;' : ''}">$${salePrice ? salePrice.toFixed(2) : oldPrice.toFixed(2)}</span><br>
+                        ${isValidPrice(salePrice) ? `<span class="old-price" style="text-decoration: line-through; color: grey;">$${oldPrice.toFixed(2)}</span> ` : ''}
+                        <span class="${isValidPrice(salePrice) ? 'sale-price' : ''}" style="${isValidPrice(salePrice) ? 'color: red;' : ''}">$${displayPrice.toFixed(2)}</span><br>
                         Mileage: ${car.mileage} miles<br>
                         Color: ${car.ext_color}<br>
                         Condition: ${car.condition}<br>
                         Year: ${car.year}<br>
                         Location: ${car.location}<br>
-                        
                     </div>
                 `;
             }));
@@ -122,6 +128,7 @@ async function fetchCars() {
         document.getElementById('cars-data').innerHTML = `<p class="error">Error fetching cars: ${error.message}</p>`;
     }
 }
+
 
 // Function to view detailed car information
 async function viewCarDetails(carId, carInvId) {
@@ -164,6 +171,7 @@ async function viewCarDetails(carId, carInvId) {
                 <p><strong>Location:</strong> ${car.location}</p>
                 <p><strong>Description:</strong> ${car.special_notes}</p>
                 <button onclick="closeCarDetails()">Close</button>
+                <button id="buy-button" onclick="proceedToPayment('${carInvId}', '${car.veh_name}', '${salePrice}')">Buy Now</button>
             `;
             showSection('car-details-section');  // Show the details section
         } else {
@@ -253,6 +261,18 @@ function closeCarDetails() {
         showSection('cars');  // Go back to the fetch cars page
     }
 }
+
+// Function that redirects to the payment page
+function proceedToPayment(id, name, price) {
+    // Collect car details from the car details page
+    const carId = id;
+    const carName = name;
+    const carPrice = price;
+
+    // Redirect to the payment page with car details in the query string
+    window.location.href = `/payment?car_id=${carId}&car_name=${encodeURIComponent(carName)}&car_price=${encodeURIComponent(carPrice)}`;
+}
+
 
 // Function to show and hide sections
 function showSection(section) {
