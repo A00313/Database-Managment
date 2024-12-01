@@ -104,6 +104,19 @@ def init_db():
         DROP TABLE IF EXISTS veh_inv
     ''')
 
+    # Create vehicle information table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS veh_info (
+            veh_id VARCHAR(10) PRIMARY KEY,
+            veh_name VARCHAR(50),
+            ext_color VARCHAR(20),
+            horsepower VARCHAR(10),
+            mileage VARCHAR(10),
+            year INTEGER NOT NULL,
+            engine TEXT NOT NULL
+            )
+    ''')
+
     # Create veicle inventory table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS veh_inv 
@@ -119,19 +132,6 @@ def init_db():
             location VARCHAR(20),
             PRIMARY KEY (veh_inv_id),
             FOREIGN KEY (veh_id) REFERENCES veh_info
-            )
-    ''')
-
-    # Create vehicle information table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS veh_info (
-            veh_id VARCHAR(10) PRIMARY KEY,
-            veh_name VARCHAR(50),
-            ext_color VARCHAR(20),
-            horsepower VARCHAR(10),
-            mileage VARCHAR(10),
-            year INTEGER NOT NULL,
-            engine TEXT NOT NULL
             )
     ''')
 
@@ -158,17 +158,21 @@ def init_db():
         )
     ''')
 
-    # Create sale campaign details table
+    # Create purchase table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS purchases (
             transaction_id SERIAL PRIMARY KEY,
-            user_id INT NOT NULL,
-            car_id INT NOT NULL,
+            cust_id VARCHAR(10),
+            emp_id VARCHAR(10),
+            veh_inv_id VARCHAR(10),
+            campaign_id VARCHAR(10),
             price DECIMAL(10, 2) NOT NULL,
             payment_status VARCHAR(50) DEFAULT 'pending',
             transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (car_id) REFERENCES cars(veh_id),
-            FOREIGN KEY (user_id) REFERENCES users(user_id)
+            FOREIGN KEY (veh_inv_id) REFERENCES veh_inv(veh_inv_id),
+            FOREIGN KEY (cust_id) REFERENCES cust_info(cust_id),
+            FOREIGN KEY (emp_id) REFERENCES emp_info(emp_id),
+            FOREIGN KEY (campaign_id) REFERENCES sale_camp(campaign_id)
         );
     ''')
 
@@ -665,15 +669,15 @@ def process_payment():
         # Get the payment data from the request
         payment_data = request.get_json()
 
-        car_id = payment_data.get('car_id')
-        user_id = payment_data.get('user_id')
+        veh_inv_id = payment_data.get('car_id')
+        cust_id = payment_data.get('user_id')
         price = payment_data.get('price')
         credit_card = payment_data.get('credit_card')
         expiration = payment_data.get('expiration')
         cvv = payment_data.get('cvv')
 
         # Validate input (you might want to add more checks here)
-        if not car_id or not user_id or not price or not credit_card or not expiration or not cvv:
+        if not veh_inv_id or not cust_id or not price or not credit_card or not expiration or not cvv:
             return jsonify({"success": False, "message": "Missing payment information"}), 400
 
         # Process the payment here (e.g., call an external payment API or simulate success)
@@ -745,8 +749,8 @@ def complete_purchase():
         # Get the request data
         data = request.get_json()
 
-        car_id = data['car_id']
-        user_id = data['user_id']
+        veh_inv_id = data['car_id']
+        cust_id = data['user_id']
         price = data['price']
         credit_card = data['credit_card']
         expiration = data['expiration']
@@ -760,7 +764,7 @@ def complete_purchase():
         cursor.execute('''
             INSERT INTO purchases (car_id, user_id, price, credit_card, expiration, cvv, transaction_date)
             VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (car_id, user_id, price, credit_card, expiration, cvv, datetime.now()))
+        ''', (veh_inv_id, cust_id, price, credit_card, expiration, cvv, datetime.now()))
         conn.commit()
         transaction_id = cursor.lastrowid
         conn.close()
