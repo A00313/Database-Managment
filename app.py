@@ -762,7 +762,7 @@ def complete_purchase():
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO purchases (car_id, user_id, price, credit_card, expiration, cvv, transaction_date)
+            INSERT INTO purchases (veh_inv_id, cust_id, price, credit_card, expiration, cvv, transaction_date)
             VALUES (?, ?, ?, ?, ?, ?, ?)
         ''', (veh_inv_id, cust_id, price, credit_card, expiration, cvv, datetime.now()))
         conn.commit()
