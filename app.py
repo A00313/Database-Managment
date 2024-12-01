@@ -86,32 +86,22 @@ def init_db():
         )
     ''')
 
-    # Create tables if they don't exist
+    
+    # Table drop to ensure data is not duplicated
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY,
-            name TEXT NOT NULL,
-            email TEXT NOT NULL
-        )
+        DROP TABLE IF EXISTS veh_info
     ''')
 
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS products (
-            id INTEGER PRIMARY KEY,
-            name TEXT NOT NULL,
-            price REAL NOT NULL
-        )
+        DROP TABLE IF EXISTS sale_camp
     ''')
 
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS orders (
-            id INTEGER PRIMARY KEY,
-            user_id INTEGER,
-            product_id INTEGER,
-            quantity INTEGER,
-            FOREIGN KEY (user_id) REFERENCES users(id),
-            FOREIGN KEY (product_id) REFERENCES products(id)
-        )
+        DROP TABLE IF EXISTS sale_camp_detailed
+    ''')
+    
+    cursor.execute('''
+        DROP TABLE IF EXISTS veh_inv
     ''')
 
     # Create veicle inventory table
@@ -311,30 +301,6 @@ def init_db():
             ('TG2024', 'INV016', 47999.99 * 0.85),
             ('TG2024', 'INV017', 55999.99 * 0.85),
             ('TG2024', 'INV018', 21999.99 * 0.85)
-        ])
-
-
-    # Insert sample data if tables are empty
-    cursor.execute('SELECT COUNT(*) FROM users')
-    if cursor.fetchone()[0] == 0:
-        cursor.executemany('INSERT INTO users (name, email) VALUES (?, ?)', [
-            ('Alice', 'alice@example.com'),
-            ('Bob', 'bob@example.com')
-        ])
-
-    cursor.execute('SELECT COUNT(*) FROM products')
-    if cursor.fetchone()[0] == 0:
-        cursor.executemany('INSERT INTO products (name, price) VALUES (?, ?)', [
-            ('Laptop', 999.99),
-            ('Phone', 599.99),
-            ('Tablet', 399.99)
-        ])
-
-    cursor.execute('SELECT COUNT(*) FROM orders')
-    if cursor.fetchone()[0] == 0:
-        cursor.executemany('INSERT INTO orders (user_id, product_id, quantity) VALUES (?, ?, ?)', [
-            (1, 1, 1),  # Alice bought 1 Laptop
-            (2, 2, 2)   # Bob bought 2 Phones
         ])
 
     conn.commit()
@@ -714,7 +680,7 @@ def process_payment():
         # For this example, we'll assume the payment was successful.
 
         # Add transaction record to database (replace this with your actual DB logic)
-        transaction_id = "12345"  # Simulate transaction ID
+        transaction_id = str(random.randint(1000000000, 9999999999))  # Simulate transaction ID
 
         # Update inventory to remove car after purchase (this part will depend on your DB setup)
         # Ensure car exists in inventory before deleting it
@@ -726,8 +692,6 @@ def process_payment():
         # Log the error and return a generic failure response
         print(f"Error during payment processing: {e}")
         return jsonify({"success": False, "message": "Payment processing failed"}), 500
-
-import sqlite3  # Assuming you're using SQLite, replace with your actual DB module if needed
 
 def delete_car_from_inventory(veh_inv_id):
     try:

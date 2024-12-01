@@ -37,33 +37,11 @@
     </nav>
 
     <div id="login-btn">
-        <button class="btn">login</button>
+        <a href="/login" class="btn">login</a>
         <i class="far fa-user"></i>
     </div>
 
 </header>
-
-<div class="login-form-container">
-
-    <span id="close-login-form" class="fas fa-times"></span>
-    <div class="messages">
-            <div class="error">Invalid username or password</div>
-        </div>
-    <form method="POST" action="/login">
-        <h3>user login</h3>
-        <div>
-                <input type="text" id="username" name="username" required>
-            </div>
-            <div>
-                <input type="password" id="password" name="password" required>
-            </div>
-        <input type="submit" value="login" class="btn">
-        <div class="auth-link">
-            <p>Don't have an account? <a href="/register">Register here</a></p>
-        </div>
-    </form>
-
-</div>
 
 <section class="home" id="home">
 
