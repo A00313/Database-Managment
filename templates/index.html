@@ -2,147 +2,432 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Example</title>
-    <link rel="stylesheet" href="/static/index.css">
+
+    <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css" />
+
+    <!-- font awesome cdn link  -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <!-- custom css file link  -->
+    <link rel="stylesheet" href="static/style.css">
+    <link rel="stylesheet" href="static/styles.css">
     <script>
         // This variable will be replaced by Flask if user is logged in
         var currentUser = null;
     </script>
+
 </head>
 <body>
-    <div id="sidebar">
-        <h2>Navigation</h2>
-        <ul>
-            <li><a href="javascript:void(0);" onclick="showSection('users')">Users</a></li>
-            <li><a href="javascript:void(0);" onclick="showSection('products')">Products</a></li>
-            <li><a href="javascript:void(0);" onclick="showSection('orders')">Orders</a></li>
-            <li><a href="javascript:void(0);" onclick="showSection('cars')">Cars</a></li>
-            <li id="loginLinks">
-                <a href="/login">Login</a>
-            </li>
-        </ul>
+
+<header class="header">
+
+    <div id="menu-btn" class="fas fa-bars"></div>
+
+    <a href="#" class="logo"> <span>Cars</span>Zone </a>
+
+    <nav class="navbar">
+        <a href="#home">home</a>
+        <a href="#services">services</a>
+        <a href="#newsletter">Search Car</a>
+        <a href="#reviews">reviews</a>
+        <a href="#contact">contact</a>
+        <a href="javascript:void(0);" onclick="fetchCars()">Cars</a>
+    </nav>
+
+    <div id="login-btn">
+        <button class="btn">login</button>
+        <i class="far fa-user"></i>
     </div>
 
-    <div id="main-content">
-        <h1>Database API Example</h1>
-        <div id="users" class="section">
-            <!-- Header Section -->
-            <header>
-                <div class="container">
-                    <h1>Welcome to Our API</h1>
-                    <p>Your go-to API for accessing users, products, orders, and cars data.</p>
-                    <a href="javascript:void(0);" class="cta-button" onclick="showSection('cars')">View Cars</a>
+</header>
 
-                    <div id="loginPrompt">
-                        <p>Please click below to login to your account</p>
-                        <a href="/login" class="login-link">Go to Login</a>
-                    </div>
-                </div>
-            </header>
+<div class="login-form-container">
 
-            <!-- Features Section -->
-            <section class="features">
-                <div class="container">
-                    <h2>Features</h2>
-                    <div class="feature-item">
-                        <h3>Users</h3>
-                        <p>Fetch user information from the API and manage your user data seamlessly.</p>
-                        <a href="/api/users">Explore Users</a>
-                    </div>
-                    <div class="feature-item">
-                        <h3>Products</h3>
-                        <p>Get product details, prices, and much more from our product database.</p>
-                        <a href="/api/products">Explore Products</a>
-                    </div>
-                    <div class="feature-item">
-                        <h3>Orders</h3>
-                        <p>Access order history, track shipments, and manage your orders.</p>
-                        <a href="/api/orders">Explore Orders</a>
-                    </div>
-                    <div class="feature-item">
-                        <h3>Cars</h3>
-                        <p>Browse our extensive collection of cars and their specifications.</p>
-                        <a href="/api/cars">Explore Cars</a>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Footer Section -->
-            <footer>
-                <div class="container">
-                    <p>&copy; 2024 API Example - All Rights Reserved.</p>
-                </div>
-            </footer>
+    <span id="close-login-form" class="fas fa-times"></span>
+    <div class="messages">
+            <div class="error">Invalid username or password</div>
         </div>
-
-        <div id="products" class="section">
-            <h2>Products</h2>
-
-            <div id="search-bar">
-                <!-- Search Input -->
-                <input type="text" id="search-query" placeholder="Search cars...">
-                <!-- Year Filter -->
-                <select id="year-filter">
-                    <option value="">Select Year</option>
-                    <option value="2020">2020</option>
-                    <option value="2021">2021</option>
-                    <option value="2022">2022</option>
-                    <option value="2023">2023</option>
-                    <option value="2024">2024</option>
-                </select>
-                <!-- Price Filter -->
-                <select id="price-filter">
-                    <option value="">Select Price Range</option>
-                    <option value="0-25000">Under $25,000</option>
-                    <option value="25000-50000">$25,000 - $50,000</option>
-                    <option value="50000-75000">$50,000 - $75,000</option>
-                    <option value="75000-100000">Above $75,000</option>
-                </select>
-                <!-- Search and Clear Buttons -->
-                <button onclick="searchCars()">Search</button>
-                <button class="clear-btn" onclick="clearSearch()">Clear Search</button>
+    <form method="POST" action="/login">
+        <h3>user login</h3>
+        <div>
+                <input type="text" id="username" name="username" required>
             </div>
-        
-            <!-- Display Cars -->
-            <div id="car-results"></div> <!-- Results will be displayed here -->
+            <div>
+                <input type="password" id="password" name="password" required>
+            </div>
+        <input type="submit" value="login" class="btn">
+        <div class="auth-link">
+            <p>Don't have an account? <a href="/register">Register here</a></p>
         </div>
+    </form>
 
-        <div id="orders" class="section">
-            <h2>Orders</h2>
-            <button onclick="fetchOrders()">Fetch Orders</button>
-            <div id="orders-data" class="data"></div>
-        </div>
+</div>
 
-        <div id="cars" class="section">
-            <h2>Cars</h2>
-            <button onclick="fetchCars()">Fetch Cars</button>
-            <div id="cars-data" class="data"></div>
+<section class="home" id="home">
+
+    <h3 data-speed="-2" class="home-parallax">find your car</h3>
+
+    <img data-speed="5" class="home-parallax" src="/static/image/home-img.png" alt="">
+
+    <a data-speed="7" href="#" class="btn home-parallax">explore cars</a>
+
+</section>
+
+<section class="icons-container">
+
+    <div class="icons">
+        <i class="fas fa-home"></i>
+        <div class="content">
+            <h3>150+</h3>
+            <p>branches</p>
         </div>
-        <!-- Car Details Section -->
-        <section id="car-details-section" class="section">
-            <h2>Car Details</h2>
-            <div id="car-details"></div>
-        </section>
     </div>
 
-    <script>
+    <div class="icons">
+        <i class="fas fa-car"></i>
+        <div class="content">
+            <h3>4770+</h3>
+            <p>cars sold</p>
+        </div>
+    </div>
+
+    <div class="icons">
+        <i class="fas fa-users"></i>
+        <div class="content">
+            <h3>320+</h3>
+            <p>happy clients</p>
+        </div>
+    </div>
+
+    <div class="icons">
+        <i class="fas fa-car"></i>
+        <div class="content">
+            <h3>1500+</h3>
+            <p>news cars</p>
+        </div>
+    </div>
+
+</section>
+
+<section class="services" id="services">
+
+    <h1 class="heading"> our <span>services</span> </h1>
+
+    <div class="box-container">
+
+        <div class="box">
+            <i class="fas fa-car"></i>
+            <h3>car selling</h3>
+            <p>Find your perfect ride – Buy or sell cars effortlessly with us!</p>
+        </div>
+
+        <div class="box">
+            <i class="fas fa-tools"></i>
+            <h3>parts repair</h3>
+            <p>Fast, reliable, and affordable parts repair service to get you back on track!</p>
+        </div>
+
+        <div class="box">
+            <i class="fas fa-car-crash"></i>
+            <h3>car insurance</h3>
+            <p>Protect your ride with reliable and affordable car insurance – get covered today!</p>
+        </div>
+
+        <div class="box">
+            <i class="fas fa-car-battery"></i>
+            <h3>battery replacement</h3>
+            <p>Quick and reliable battery replacement service to keep you powered up!</p>
+        </div>
+
+        <div class="box">
+            <i class="fas fa-gas-pump"></i>
+            <h3>oil change</h3>
+            <p>Keep your engine running smoothly—schedule your quick and affordable oil change today!</p>
+        </div>
+
+        <div class="box">
+            <i class="fas fa-headset"></i>
+            <h3>24/7 support</h3>
+            <p>Get round-the-clock assistance with our 24/7 support service—always here when you need us!</p>
+        </div>
+
+    </div>
+
+</section>
+
+<div id="cars" class="section">
+    <h2>Cars</h2>
+    <div id="cars-data" class="data"></div>
+</div>
+<!-- Car Details Section -->
+<section id="car-details-section" class="section">
+    <h2>Car Details</h2>
+    <div id="car-details"></div>
+</section>
+
+<section class="newsletter" id="newsletter">
+
+    <h3>Your next car, just a search away!</h3>
+    <p>Find your perfect car effortlessly — Use our smart search bar to explore options in seconds!</p>
+
+   <div>
+        <!-- Search Bar Input -->
+        <input type="text" id="search-query" placeholder="Search cars...">
+
+        <!-- Year Filter -->
+        <select id="year-filter">
+            <option value="">Select Year</option>
+            <option value="2020">2020</option>
+            <option value="2021">2021</option>
+            <option value="2022">2022</option>
+            <option value="2023">2023</option>
+            <option value="2024">2024</option>
+        </select>
+
+        <!-- Price Filter -->
+        <select id="price-filter">
+            <option value="">Select Price Range</option>
+            <option value="0-25000">Under $25,000</option>
+            <option value="25000-50000">$25,000 - $50,000</option>
+            <option value="50000-75000">$50,000 - $75,000</option>
+            <option value="75000-100000">Above $75,000</option>
+        </select>
+        <button onclick="searchCars()">Search</button>
+        <button class="clear-btn" onclick="clearSearch()">Clear Search</button>
+   </div>
+</section>
+
+<!-- Display Cars -->
+<div id="car-results"></div> <!-- Results will be displayed here -->
+
+<section class="reviews" id="reviews">
+
+    <h1 class="heading"> client's <span>review</span> </h1>
+
+    <div class="swiper review-slider">
+
+        <div class="swiper-wrapper">
+
+            <div class="swiper-slide box">
+                <img src="/static/image/pic-1.png" alt="">
+                <div class="content">
+                    <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsam incidunt quod praesentium iusto id autem possimus assumenda at ut saepe.</p>
+                    <h3>john deo</h3>
+                    <div class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swiper-slide box">
+                <img src="/static/image/pic-2.png" alt="">
+                <div class="content">
+                    <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsam incidunt quod praesentium iusto id autem possimus assumenda at ut saepe.</p>
+                    <h3>john deo</h3>
+                    <div class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swiper-slide box">
+                <img src="/static/image/pic-3.png" alt="">
+                <div class="content">
+                    <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsam incidunt quod praesentium iusto id autem possimus assumenda at ut saepe.</p>
+                    <h3>john deo</h3>
+                    <div class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swiper-slide box">
+                <img src="/static/image/pic-4.png" alt="">
+                <div class="content">
+                    <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsam incidunt quod praesentium iusto id autem possimus assumenda at ut saepe.</p>
+                    <h3>john deo</h3>
+                    <div class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swiper-slide box">
+                <img src="/static/image/pic-5.png" alt="">
+                <div class="content">
+                    <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsam incidunt quod praesentium iusto id autem possimus assumenda at ut saepe.</p>
+                    <h3>john deo</h3>
+                    <div class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swiper-slide box">
+                <img src="/static/image/pic-6.png" alt="">
+                <div class="content">
+                    <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsam incidunt quod praesentium iusto id autem possimus assumenda at ut saepe.</p>
+                    <h3>john deo</h3>
+                    <div class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="swiper-pagination"></div>
+
+    </div>
+
+</section>
+
+<section class="contact" id="contact">
+
+    <h1 class="heading"><span>contact</span> us</h1>
+
+    <div class="row">
+
+        <iframe class="map" src="https://map.concept3d.com/?id=1315#!ct/37767,38242,38322,38325,38344?s/?mc/40.44930114657438,-79.9496898377402?z/13?lvl/0?share " allowfullscreen="" loading="lazy"></iframe>
+
+        <form action="">
+            <h3>get in touch</h3>
+            <input type="text" placeholder="your name" class="box">
+            <input type="email" placeholder="your email" class="box">
+            <input type="tel" placeholder="subject" class="box">
+            <textarea placeholder="your message" class="box" cols="30" rows="10"></textarea>
+            <input type="submit" value="send message" class="btn">
+        </form>
+
+    </div>
+
+</section>
+
+<section class="footer" id="footer">
+
+    <div class="box-container">
+
+        <div class="box">
+            <h3>our branches</h3>
+            <a href="#"> <i class="fas fa-map-marker-alt"></i> india </a>
+            <a href="#"> <i class="fas fa-map-marker-alt"></i> japan </a>
+            <a href="#"> <i class="fas fa-map-marker-alt"></i> france </a>
+            <a href="#"> <i class="fas fa-map-marker-alt"></i> russia </a>
+            <a href="#"> <i class="fas fa-map-marker-alt"></i> USA </a>
+        </div>
+
+        <div class="box">
+            <h3>quick links</h3>
+            <a href="#home"> <i class="fas fa-arrow-right"></i> home </a>
+            <a href="/api/cars"> <i class="fas fa-arrow-right"></i> Popular Cars </a>
+            <a href="#services"> <i class="fas fa-arrow-right"></i> services </a>
+            <a href="#newsletter"> <i class="fas fa-arrow-right"></i>Search Car </a>
+            <a href="#reviews"> <i class="fas fa-arrow-right"></i> reviews </a>
+            <a href="#contact"> <i class="fas fa-arrow-right"></i> contact </a>
+        </div>
+
+        <div class="box">
+            <h3>contact info</h3>
+            <a href="#"> <i class="fas fa-phone"></i> +1(412)224-8598 </a>
+            <a href="#"> <i class="fas fa-phone"></i> +91 8887572168 </a>
+            <a href="#"> <i class="fas fa-envelope"></i> vinamra@gmail.com </a>
+            <a href="#"> <i class="fas fa-map-marker-alt"></i> Pittsburgh, Pennsylvania - 15213 </a>
+        </div>
+
+        <div class="box">
+            <h3>contact info</h3>
+            <a href="#"> <i class="fab fa-facebook-f"></i> facebook </a>
+            <a href="#"> <i class="fab fa-twitter"></i> twitter </a>
+            <a href="#"> <i class="fab fa-instagram"></i> instagram </a>
+            <a href="#"> <i class="fab fa-linkedin"></i> linkedin </a>
+            <a href="#"> <i class="fab fa-pinterest"></i> pinterest </a>
+        </div>
+
+    </div>
+
+    <div class="credit"> created by VINAMRA SINGH | all rights reserved </div>
+
+</section>
+
+
+<script>
         // Check if user is logged in using the global variable
         if (currentUser) {
             // Update navigation links
-            document.getElementById('loginLinks').innerHTML = `
-                <a href="/account">Account</a>
-                <a href="/logout" style="margin-left: 10px;">Logout</a>
+            document.getElementById('login-btn').innerHTML = `
+                <a href="/account" class="btn">Account</a>
+                <a href="/logout" style="margin-left: 10px;" class="btn">Logout</a>
             `;
-            
-            // Hide login prompt
-            document.getElementById('loginPrompt').style.display = 'none';
         }
 
         function showSection(sectionName) {
             // Your existing showSection code
         }
-    </script>
-    <script src="/static/script.js"></script>
+
+
+        function renderNavbar() {
+            const navLinks = document.getElementById("nav-links");
+            // Clear existing "Users" and "Orders" links
+            const usersLink = document.querySelector("#nav-links li[data-section='users']");
+            const ordersLink = document.querySelector("#nav-links li[data-section='orders']");
+            if (usersLink) usersLink.remove();
+            if (ordersLink) ordersLink.remove();
+
+            if (currentUser) {
+                // Add "Users" link if logged in
+                const usersLink = document.createElement("li");
+                usersLink.setAttribute("data-section", "users");
+                usersLink.innerHTML = `<a href="javascript:void(0);" onclick="showSection('users')">Users</a>`;
+                navLinks.insertBefore(usersLink, navLinks.firstChild); // Add at the top
+
+                // Add "Orders" link if logged in
+                const ordersLink = document.createElement("li");
+                ordersLink.setAttribute("data-section", "orders");
+                ordersLink.innerHTML = `<a href="javascript:void(0);" onclick="showSection('orders')">Orders</a>`;
+                navLinks.insertBefore(ordersLink, usersLink.nextSibling); // Add after "Users"
+                }
+                }
+
+       // Initialize navbar on page load
+       window.addEventListener("DOMContentLoaded", () => {
+            renderNavbar();
+            });
+
+       if (window.location.search.includes('error=1')) {
+            document.querySelector('.error').classList.add('show');
+        }
+</script>
+<script src="https://unpkg.com/swiper@7/swiper-bundle.min.js"></script>
+
+<script src="/static/indexScript.js"></script>
+
+<script src="/static/script.js"></script>
+
 </body>
 </html>

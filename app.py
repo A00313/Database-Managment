@@ -519,8 +519,7 @@ def register():
             # Get current date for account creation
             acct_creation_dt = datetime.now().strftime('%Y-%m-%d')
 
-            print(f"Inserting into login_info: {login_id}, {
-                  username}, {password}, customer")
+            print(f"Inserting into login_info: {login_id}, {username}, {password}, customer")
             # Insert into login_info table
             cursor.execute('''
                 INSERT INTO login_info (login_id, username, password, user_type)
@@ -530,8 +529,7 @@ def register():
             # Generate customer ID (CUST + last 6 digits of login_id)
             cust_id = 'CUST' + login_id[-6:]
 
-            print(f"Inserting into cust_info: {cust_id}, {login_id}, {f_name}, {
-                  l_name}, {email}, {phone_num}, {birthday}, {acct_creation_dt}, active")
+            print(f"Inserting into cust_info: {cust_id}, {login_id}, {f_name}, {l_name}, {email}, {phone_num}, {birthday}, {acct_creation_dt}, active")
             # Insert into cust_info table
             cursor.execute('''
                 INSERT INTO cust_info (cust_id, login_id, f_name, l_name, email, phone_num, birthday, acct_creation_dt, acct_status)
