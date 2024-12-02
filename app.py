@@ -120,7 +120,7 @@ def init_db():
         office_hours VARCHAR(200),
         emp_intro VARCHAR(1000),
         emp_status VARCHAR(10),
-        pic_url VARCHAR(200),
+        image_url VARCHAR(200),
         PRIMARY KEY (emp_id)
         )
     ''')
@@ -129,9 +129,10 @@ def init_db():
     cursor.execute('SELECT COUNT(*) FROM emp_info')
     if cursor.fetchone()[0] == 0:
         cursor.executemany('''
-            INSERT INTO emp_info (emp_id, f_name, l_name, email, phone_num, office_hours, emp_intro, emp_status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', [('emp0', 'online', 'online', 'online@example.com', '123-456-7890', 'N/A', 'This is for online sales', 'active')
+            INSERT INTO emp_info (emp_id, f_name, l_name, email, phone_num, office_hours, emp_intro, emp_status, image_url)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', [('emp0', 'online', 'online', 'online@example.com', '123-456-7890', 'N/A', 'This is for online sales', 'active', 
+              'no_url'),
               ('emp1', 'John', 'Doe', 'JohnDoe@example.com', '123-456-7890', 'Mon-Fri: 9am-5pm', 
               "John Doe brings years of expertise and a passion for cars to every customer interaction. Whether you’re searching for the latest models or a dependable pre-owned vehicle, John is dedicated to finding the right fit for your lifestyle and budget. Known for his straightforward advice and exceptional customer care, John ensures a hassle-free buying experience from start to finish.", 'active',
               'https://media.gettyimages.com/id/1919265357/photo/close-up-portrait-of-confident-businessman-standing-in-office.jpg?s=2048x2048&w=gi&k=20&c=Y0-O4sl85iNuYPC9U4PEagLOOuGOC0xHWnhR_YOSJYk='),
@@ -818,7 +819,6 @@ def complete_purchase():
         print("Error processing payment:", e)
         return jsonify({'success': False, 'message': 'Payment failed. Please try again.'}), 500
 
-
 @app.route('/payment')
 def payment():
     return render_template('payment.html')
@@ -827,6 +827,79 @@ def payment():
 def home():
     return render_template('index.html')
 
+# Employee list page
+@app.route('/employees')
+def employees():
+    return render_template('employee.html')
+
+# Employee detail page
+@app.route('/employee/<emp_id>')
+def employee_detail(emp_id):
+    return render_template('employee_detail.html')
+
+# API endpoint to get all employees
+@app.route('/api/employees')
+def get_employees():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Ignore employee 0 (online)
+    cursor.execute('''
+        SELECT emp_id, f_name, l_name, email, phone_num, office_hours, emp_intro, image_url
+        FROM emp_info
+        WHERE emp_status = 'active'
+        AND emp_id <> 'emp0'
+    ''')
+    
+    employees = cursor.fetchall()
+    conn.close()
+    
+    # Convert employees to list of dictionaries
+    employee_list = []
+    for emp in employees:
+        employee_list.append({
+            'id': emp['emp_id'],
+            'first_name': emp['f_name'],
+            'last_name': emp['l_name'],
+            'email': emp['email'],
+            'phone_number': emp['phone_num'],
+            'office_hours': emp['office_hours'],
+            'intro': emp['emp_intro'],
+            'image_url': emp['image_url']
+        })
+    
+    return jsonify(employee_list)
+
+# API endpoint to get specific employee details
+@app.route('/api/employee/<emp_id>')
+def get_employee(emp_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        SELECT emp_id, f_name, l_name, email, phone_num, office_hours, emp_intro, image_url
+        FROM emp_info
+        WHERE emp_id = ? AND emp_status = 'active'
+    ''', (emp_id,))
+    
+    emp = cursor.fetchone()
+    conn.close()
+    
+    if emp is None:
+        return jsonify({'error': 'Employee not found'}), 404
+    
+    employee_data = {
+        'id': emp['emp_id'],
+        'first_name': emp['f_name'],
+        'last_name': emp['l_name'],
+        'email': emp['email'],
+        'phone_number': emp['phone_num'],
+        'office_hours': emp['office_hours'],
+        'intro': emp['emp_intro'],
+        'image_url': emp['image_url']
+    }
+    
+    return jsonify(employee_data)
 
 if __name__ == '__main__':
     init_db()  # Initialize the database with tables and data

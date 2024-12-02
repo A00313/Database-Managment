@@ -2,9 +2,24 @@
 <html>
 <head>
     <title>Account Information</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
+    <header class="header">
+        <div id="menu-btn" class="fas fa-bars"></div>
+        <a href="#" class="logo"> <span>Cars</span>Zone </a>
+        <nav class="navbar">
+            <a href="/#home">home</a>
+            <a href="/#services">services</a>
+            <a href="/#newsletter">Search Car</a>
+            <a href="/#contact">contact</a>
+            <a href="javascript:void(0);" onclick="fetchCars()">Cars</a>
+            <a href="/employees">Employees</a>
+        </nav>
+    </header>
+
     <div class="auth-container">
         <h2>Account Information</h2>
         <div class="alert alert-{{ message_type }}" style="display: {{ 'block' if message else 'none' }}">

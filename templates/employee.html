@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="static/style.css">
+    <link rel="stylesheet" href="static/styles.css">
+</head>
+<body>
+
+<header class="header">
+    <div id="menu-btn" class="fas fa-bars"></div>
+    <a href="/" class="logo"> <span>Cars</span>Zone </a>
+    <nav class="navbar">
+        <a href="/#home">home</a>
+        <a href="/#services">services</a>
+        <a href="/#newsletter">Search Car</a>
+        <a href="/#contact">contact</a>
+        <a href="javascript:void(0);" onclick="fetchCars()">Cars</a>
+        <a href="/employees">Employees</a>
+    </nav>
+    <div id="login-btn">
+        <a href="/login" class="btn">login</a>
+        <i class="far fa-user"></i>
+    </div>
+</header>
+
+<section class="employee-section">
+    <div class="employee-grid" id="employeeGrid">
+    </div>
+</section>
+
+<script>
+    async function loadEmployees() {
+        try {
+            const response = await fetch('/api/employees');
+            const employees = await response.json();
+            const grid = document.getElementById('employeeGrid');
+            
+            employees.forEach(employee => {
+                const card = document.createElement('div');
+                card.className = 'employee-card';
+                card.innerHTML = `
+                    <img src="${employee.image_url}" alt="${employee.first_name} ${employee.last_name}" 
+                         onclick="window.location.href='/employee/${employee.id}'">
+                    <h3 onclick="window.location.href='/employee/${employee.id}'">
+                        ${employee.first_name} ${employee.last_name}
+                    </h3>
+                    <p><i class="fas fa-phone"></i> ${employee.phone_number}</p>
+                    <p><i class="fas fa-envelope"></i> ${employee.email}</p>
+                    <div class="office-hours">
+                        <i class="fas fa-clock"></i> Office Hours:<br>
+                        ${employee.office_hours}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        } catch (error) {
+            console.error('Error loading employees:', error);
+        }
+    }
+
+    window.addEventListener('load', loadEmployees);
+</script>
+
+</body>
+</html>

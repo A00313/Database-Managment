@@ -8,12 +8,18 @@ body {
 /* Login and Registration Form Styles */
 .auth-container {
     font-family: Arial, sans-serif;
-    max-width: 600px;
-    margin: 50px auto;
+    max-width: 500px;
+    margin: 120px auto 20px auto;
     padding: 20px;
-    background-color: white;
+    background-color: #fff;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.auth-container h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
 }
 
 .form-group {
@@ -23,12 +29,14 @@ body {
 .form-group label {
     display: block;
     margin-bottom: 5px;
+    font-size: 16px;
     color: #333;
 }
 
 .form-group input {
     width: 100%;
-    padding: 8px;
+    padding: 10px;
+    font-size: 14px;
     border: 1px solid #ddd;
     border-radius: 4px;
     box-sizing: border-box;
@@ -37,7 +45,7 @@ body {
 .auth-button {
     background-color: #4CAF50;
     color: white;
-    padding: 10px 15px;
+    padding: 10px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -47,6 +55,15 @@ body {
 
 .auth-button:hover {
     background-color: #45a049;
+}
+
+.auth-container p {
+    font-size: 14px;
+    margin: 15px 0;
+}
+
+.auth-container a {
+    font-size: 14px;
 }
 
 /* Message styles */
@@ -62,6 +79,7 @@ body {
     background-color: #f8d7da;
     color: #721c24;
     border: 1px solid #f5c6cb;
+    font-size: 14px;
 }
 
 /* Show error when it has 'show' class */
@@ -150,4 +168,127 @@ body {
     background-color: #f8d7da;
     color: #721c24;
     border: 1px solid #f5c6cb;
+}
+
+/* Employee Page Styles */
+.employee-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.employee-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.employee-card img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 15px;
+    cursor: pointer;
+}
+
+.employee-card h3 {
+    font-size: 18px;
+    margin: 10px 0;
+    cursor: pointer;
+    color: #333;
+}
+
+.employee-card p {
+    font-size: 14px;
+    color: #666;
+    margin: 5px 0;
+}
+
+.employee-section {
+    padding: 20px 0;
+    margin-top: 70px;
+}
+
+.office-hours {
+    margin-top: 5px;
+    padding-top: 5px;
+    border-top: 1px solid #eee;
+    font-style: italic;
+}
+
+/* Employee Detail Page Styles */
+.employee-detail-section {
+    margin-top: 80px;
+    padding: 20px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.employee-detail-card {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.employee-detail-card img {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 20px;
+}
+
+.employee-detail-card h2 {
+    font-size: 24px;
+    margin: 10px 0;
+    color: #333;
+}
+
+.employee-detail-info {
+    margin-top: 20px;
+    text-align: left;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.info-section {
+    margin-bottom: 20px;
+}
+
+.info-section h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.info-section p {
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 5px 0;
+    color: #666;
+}
+
+.contact-info {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.contact-info p {
+    margin: 10px 0;
+    padding: 5px 10px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #666;
 }
