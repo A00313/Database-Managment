@@ -26,8 +26,6 @@ def get_username(login_id):
     return result['username'] if result else None
 
 # Helper function to connect to the database
-
-
 def get_db_connection():
     conn = sqlite3.connect('example.db')  # SQLite DB file
     conn.row_factory = sqlite3.Row  # To return rows as dictionaries
