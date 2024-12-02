@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Account Information</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header class="header">
+        <div id="menu-btn" class="fas fa-bars"></div>
+        <a href="#" class="logo"> <span>Cars</span>Zone </a>
+        <nav class="navbar">
+            <a href="/#home">home</a>
+            <a href="/#services">services</a>
+            <a href="/#newsletter">Search Car</a>
+            <a href="/#contact">contact</a>
+            <a href="/cars">Cars</a>
+            <a href="/employees">Employees</a>
+        </nav>
+    </header>
+
+    <div class="auth-container">
+        <h2>Account Information</h2>
+        <div class="alert alert-{{ message_type }}" style="display: {{ 'block' if message else 'none' }}">
+            {{ message }}
+        </div>
+            <form method="POST" action="/update_account">
+                <div class="form-group">
+                    <label for="username">Username: <span style="color: #666; font-size: 0.9em;">(cannot be changed)</span></label>
+                    <input type="text" id="username" name="username" value="{{ user_info.username }}" readonly style="background-color: #f0f0f0; cursor: not-allowed;">
+                </div>
+                <div class="form-group">
+                    <label for="current_password">Current Password: <span style="color: #ff0000;">*</span></label>
+                    <input type="password" id="current_password" name="current_password" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">New Password: <span style="color: #666; font-size: 0.9em;">(leave blank to keep current password)</span></label>
+                    <input type="password" id="password" name="password" placeholder="Enter new password">
+                </div>
+                <div class="form-group">
+                    <label for="f_name">First Name:</label>
+                    <input type="text" id="f_name" name="f_name" value="{{ user_info.f_name }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="l_name">Last Name:</label>
+                    <input type="text" id="l_name" name="l_name" value="{{ user_info.l_name }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" value="{{ user_info.email }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone_num">Phone Number:</label>
+                    <input type="tel" id="phone_num" name="phone_num" value="{{ user_info.phone_num }}" pattern="[0-9]+" title="Please enter numbers only" required>
+                </div>
+                <div class="form-group">
+                    <label for="birthday">Birthday:</label>
+                    <input type="date" id="birthday" name="birthday" value="{{ user_info.birthday }}" required>
+                </div>
+                <button type="submit" class="auth-button">Update Information</button>
+            </form>
+        </div>
+        <div class="auth-link">
+            <a href="/">Return to Main Page</a>
+            <a href="/logout" style="margin-left: 10px;">Logout</a>
+        </div>
+    </div>
+    <script>
+        // Automatically hide the message after 5 seconds
+        if (document.querySelector('.alert').style.display === 'block') {
+            setTimeout(function() {
+                document.querySelector('.alert').style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

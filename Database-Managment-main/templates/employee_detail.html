@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/styles.css">
+    <script>
+        // This variable will be replaced by Flask if user is logged in
+        var currentUser = null;
+    </script>
+</head>
+<body>
+
+<header class="header">
+    <div id="menu-btn" class="fas fa-bars"></div>
+    <a href="/" class="logo"> <span>Cars</span>Zone </a>
+    <nav class="navbar">
+        <a href="/#home">home</a>
+        <a href="/#services">services</a>
+        <a href="/#newsletter">Search Car</a>
+        <a href="/#contact">contact</a>
+        <a href="/cars">Cars</a>
+        <a href="/employees">Employees</a>
+    </nav>
+    <div id="login-btn">
+        <a href="/login" class="btn">login</a>
+        <i class="far fa-user"></i>
+    </div>
+</header>
+
+<section class="employee-detail-section">
+    <div class="employee-detail-card">
+        <img id="employeeImage" src="" alt="Employee Photo">
+        <h2 id="employeeName"></h2>
+        
+        <div class="contact-info">
+            <p><i class="fas fa-phone"></i> <span id="employeePhone"></span></p>
+            <p><i class="fas fa-envelope"></i> <span id="employeeEmail"></span></p>
+        </div>
+
+        <div class="employee-detail-info">
+            <div class="info-section">
+                <h3><i class="fas fa-clock"></i> Office Hours</h3>
+                <p id="employeeHours"></p>
+            </div>
+
+            <div class="info-section">
+                <h3><i class="fas fa-user-tie"></i> About Me</h3>
+                <p id="employeeIntro"></p>
+            </div>
+        </div>
+    </div>
+    <section class="employee-reviews">
+    <h3>Employee Reviews</h3>
+    <div id="reviewContainer">
+        <!-- Reviews will be dynamically loaded here -->
+    </div>
+</section>
+
+<div id="reviewSection">
+
+    <!-- Only show the review form if the user is logged in -->
+    <div id="reviewFormSection" style="display: none;">
+        <h3>Submit Your Review</h3>
+        <form id="reviewForm">
+            <label for="reviewScore">Score (1-5):</label>
+            <input type="number" id="reviewScore" name="reviewScore" min="1" max="5" required>
+
+            <label for="reviewComment">Comment:</label>
+            <textarea id="reviewComment" name="reviewComment" rows="4" required></textarea>
+
+            <button type="submit" class="btn">Submit Review</button>
+        </form>
+    </div>
+</div>
+</div>
+</div>
+</section>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (currentUser) {
+        // Show the review form
+        document.getElementById('reviewFormSection').style.display = 'block';
+    }
+});
+
+    // Check if user is logged in using the global variable
+        if (currentUser) {
+            // Update navigation links
+            document.getElementById('login-btn').innerHTML = `
+                <a href="/account" class="btn">Account</a>
+                <a href="/logout" style="margin-left: 10px;" class="btn">Logout</a>
+            `;
+        }
+    async function loadEmployeeDetails() {
+        try {
+            const employeeId = window.location.pathname.split('/').pop();
+            const response = await fetch(`/api/employee/${employeeId}`);
+            const employee = await response.json();
+            
+            document.getElementById('employeeImage').src = employee.image_url;
+            document.getElementById('employeeImage').alt = `${employee.first_name} ${employee.last_name}`;
+            document.getElementById('employeeName').textContent = `${employee.first_name} ${employee.last_name}`;
+            document.getElementById('employeePhone').textContent = employee.phone_number;
+            document.getElementById('employeeEmail').textContent = employee.email;
+            document.getElementById('employeeHours').textContent = employee.office_hours;
+            document.getElementById('employeeIntro').textContent = employee.intro;
+        } catch (error) {
+            console.error('Error loading employee details:', error);
+        }
+    }
+
+    window.addEventListener('load', loadEmployeeDetails);
+    document.getElementById('reviewForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const empId = window.location.pathname.split('/').pop(); // Employee ID from URL
+    const custId = currentUser; // Use logged-in user ID
+    const reviewScore = document.getElementById('reviewScore').value;
+    const reviewComment = document.getElementById('reviewComment').value;
+
+    try {
+        const response = await fetch(`/api/review/${empId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                cust_id: custId,
+                review_score: reviewScore,
+                review_comment: reviewComment,
+            }),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert('Review submitted successfully');
+            loadReviews(); // Reload reviews
+        } else {
+            alert(result.error || 'An error occurred while submitting the review');
+        }
+    } catch (error) {
+        console.error('Error submitting review:', error);
+        alert('An error occurred while submitting the review');
+    }
+});
+</script>
+
+<script src="/static/script.js"></script>
+
+</body>
+</html>
