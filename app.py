@@ -781,6 +781,10 @@ def payment():
 def home():
     return render_template('index.html')
 
+@app.route('/cars')
+def cars():
+    return render_template('cars.html')
+
 
 if __name__ == '__main__':
     init_db()  # Initialize the database with tables and data

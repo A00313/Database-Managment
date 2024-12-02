@@ -692,3 +692,49 @@ section{
 .auth-link a:hover {
     text-decoration: underline;
 }
+
+
+.data-item {
+    background-color: white;
+    width: 250px;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.data-item:hover {
+    transform: scale(1.05);
+}
+
+.data-item img {
+    width: 100%;
+    height: auto;
+    max-height: 150px;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+.data-item h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.data-item p {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+/* Data item styles */
+.data-item {
+    margin-bottom: 12px;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.data-item:last-child {
+    border-bottom: none;
+}
