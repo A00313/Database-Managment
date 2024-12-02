@@ -216,7 +216,7 @@ def init_db():
             transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             credit_card VARCHAR(20),
             expiration VARCHAR(20),
-            cvv VARCHAR(3),
+            cvv VARCHAR(4),
             FOREIGN KEY (veh_inv_id) REFERENCES veh_inv(veh_inv_id),
             FOREIGN KEY (cust_id) REFERENCES cust_info(cust_id),
             FOREIGN KEY (emp_id) REFERENCES emp_info(emp_id),

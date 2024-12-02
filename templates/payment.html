@@ -106,17 +106,19 @@
         <form id="payment-form">
             <div class="form-group">
                 <label for="credit-card">Credit Card Number</label>
-                <input type="text" id="credit-card" name="credit-card" placeholder="Enter your card number" required>
+                <input type="text" id="credit-card" name="credit-card" placeholder="Enter your card number" 
+                       pattern="\d*" maxlength="16" inputmode="numeric" required>
             </div>
 
             <div class="form-group">
                 <label for="expiration">Expiration Date</label>
-                <input type="text" id="expiration" name="expiration" placeholder="MM/YY" required>
+                <input type="date" id="expiration" name="expiration" placeholder="MM/YY" required>
             </div>
 
             <div class="form-group">
                 <label for="cvv">CVV</label>
-                <input type="text" id="cvv" name="cvv" placeholder="Enter CVV" required>
+                <input type="text" id="cvv" name="cvv" placeholder="Enter CVV" 
+                       pattern="\d*" maxlength="4" inputmode="numeric" required>
             </div>
 
             <button type="submit">Complete Payment</button>
