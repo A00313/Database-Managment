@@ -859,6 +859,8 @@ def complete_purchase(transaction_id, veh_inv_id, cust_id, campaign_id, emp_id, 
 
 @app.route('/payment')
 def payment():
+    if not current_user_id:
+        return redirect(url_for('login'))
     return render_template('payment.html')
 
 @app.route('/home')
