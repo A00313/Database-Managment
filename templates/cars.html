@@ -4,6 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Car Listings</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header class="header">
+        <div id="menu-btn" class="fas fa-bars"></div>
+        <a href="#" class="logo"> <span>Cars</span>Zone </a>
+        <nav class="navbar">
+            <a href="/#home">home</a>
+            <a href="/#services">services</a>
+            <a href="/#newsletter">Search Car</a>
+            <a href="/#contact">contact</a>
+            <a href="/cars">Cars</a>
+            <a href="/employees">Employees</a>
+        </nav>
+    </header>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -29,7 +45,7 @@
 
         .container {
             width: 80%;
-            margin: 20px auto;
+            margin: 120px auto 20px auto;
         }
         .car-card {
             display: inline-block;
@@ -147,9 +163,6 @@
     </style>
 </head>
 <body>
-
-<!-- Back to Home Button -->
-<button class="back-button" onclick="window.location.href='/home'">Back to Home</button>
 
 <div class="container">
     <h1>Available Cars</h1>

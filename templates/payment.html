@@ -6,6 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Page</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header class="header">
+        <div id="menu-btn" class="fas fa-bars"></div>
+        <a href="#" class="logo"> <span>Cars</span>Zone </a>
+        <nav class="navbar">
+            <a href="/#home">home</a>
+            <a href="/#services">services</a>
+            <a href="/#newsletter">Search Car</a>
+            <a href="/#contact">contact</a>
+            <a href="/cars">Cars</a>
+            <a href="/employees">Employees</a>
+        </nav>
+    </header>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -17,7 +33,7 @@
         .container {
             width: 100%;
             max-width: 600px;
-            margin: 50px auto;
+            margin: 120px auto;
             padding: 30px;
             background-color: #fff;
             border-radius: 8px;
@@ -69,10 +85,11 @@
         button:hover {
             background-color: #2ecc71;
         }
-        .footer {
+        .payment-footer {
             text-align: center;
             margin-top: 30px;
             font-size: 14px;
+            color: #666;
         }
     </style>
 </head>
@@ -105,7 +122,7 @@
             <button type="submit">Complete Payment</button>
         </form>
 
-        <div class="footer">
+        <div class="payment-footer">
             <p>Secure payment via Stripe &bull; Your data is protected</p>
         </div>
     </div>

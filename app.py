@@ -108,6 +108,10 @@ def init_db():
         DROP TABLE IF EXISTS emp_info
     ''')
 
+    cursor.execute('''
+        DROP TABLE IF EXISTS purchases
+    ''')
+
     # Create employee information table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS emp_info
@@ -204,7 +208,7 @@ def init_db():
     # Create purchase table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS purchases (
-            transaction_id SERIAL PRIMARY KEY,
+            transaction_id VARCHAR(20) PRIMARY KEY,
             cust_id VARCHAR(10),
             emp_id VARCHAR(10),
             veh_inv_id VARCHAR(10),
@@ -212,11 +216,14 @@ def init_db():
             price DECIMAL(10, 2) NOT NULL,
             payment_status VARCHAR(50) DEFAULT 'pending',
             transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            credit_card VARCHAR(20),
+            expiration VARCHAR(20),
+            cvv VARCHAR(3),
             FOREIGN KEY (veh_inv_id) REFERENCES veh_inv(veh_inv_id),
             FOREIGN KEY (cust_id) REFERENCES cust_info(cust_id),
             FOREIGN KEY (emp_id) REFERENCES emp_info(emp_id),
             FOREIGN KEY (campaign_id) REFERENCES sale_camp(campaign_id)
-        );
+        )
     ''')
 
     # Insert sample data for veh_info with new fields
@@ -226,51 +233,51 @@ def init_db():
         INSERT INTO veh_info (veh_id, veh_name, ext_color, engine, horsepower, mileage, year)
     VALUES (?, ?, ?, ?, ?, ?, ?)
     ''', [
-        ('V001', 'Tesla Model S', 'Black', 'Electric Motor', '1020', '15000', '2024'),
-        ('V002', 'BMW X5', 'White', '3.0L I6 Turbo', '335', '30000', '2022'),
-        ('V003', 'Ford Mustang', 'Blue', '5.0L V8', '450', '25000', '2020'),
-        ('V004', 'Audi A4', 'Red', '2.0L I4 Turbo', '248', '20000', '2023'),
-        ('V005', 'Chevrolet Corvette', 'Yellow', '6.2L V8', '495', '5000', '2022'),
-        ('V006', 'Mercedes-Benz C-Class', 'Silver', '2.0L I4 Turbo', '255', '10000', '2021'),
-        ('V007', 'Honda Civic', 'Green', '2.0L I4', '158', '15000', '2020'),
-        ('V008', 'Toyota Camry', 'Black', '2.5L I4', '203', '18000', '2021'),
-        ('V009', 'Nissan Altima', 'White', '2.5L I4', '182', '22000', '2021'),
-        ('V010', 'Jaguar F-Type', 'Orange', '5.0L V8', '380', '12000', '2021'),
-        ('V011', 'Lexus RX', 'Blue', '3.5L V6', '295', '27000', '2023'),
-        ('V012', 'Porsche 911', 'Silver', '3.0L Twin-Turbo H6', '443', '3000', '2023'),
-        ('V013', 'Subaru Outback', 'Grey', '2.5L H4', '175', '32000', '2022'),
-        ('V014', 'Mazda CX-5', 'Red', '2.5L I4', '187', '22000', '2021'),
-        ('V015', 'Chrysler Pacifica', 'Red', '3.6L V6', '287', '15000', '2023'),
-        ('V016', 'BMW 3 Series', 'Blue', '2.0L I4 Turbo', '255', '24000', '2023'),
-        ('V017', 'Ford F-150', 'Black', '3.5L EcoBoost V6', '400', '28000', '2022'),
-        ('V018', 'Hyundai Elantra', 'Silver', '2.0L I4', '147', '15000', '2023')
+        ('V001', 'Tesla Model S', 'Black', 'Electric Motor', '1020', '25', '2024'),
+        ('V002', 'BMW X5', 'White', '3.0L I6 Turbo', '335', '25', '2022'),
+        ('V003', 'Ford Mustang', 'Blue', '5.0L V8', '450', '25', '2020'),
+        ('V004', 'Audi A4', 'Red', '2.0L I4 Turbo', '248', '23', '2023'),
+        ('V005', 'Chevrolet Corvette', 'Yellow', '6.2L V8', '495', '26', '2022'),
+        ('V006', 'Mercedes-Benz C-Class', 'Silver', '2.0L I4 Turbo', '255', '21', '2021'),
+        ('V007', 'Honda Civic', 'Green', '2.0L I4', '158', '18', '2020'),
+        ('V008', 'Toyota Camry', 'Black', '2.5L I4', '203', '23', '2021'),
+        ('V009', 'Nissan Altima', 'White', '2.5L I4', '182', '25', '2021'),
+        ('V010', 'Jaguar F-Type', 'Orange', '5.0L V8', '380', '30', '2021'),
+        ('V011', 'Lexus RX', 'Blue', '3.5L V6', '295', '28', '2023'),
+        ('V012', 'Porsche 911', 'Silver', '3.0L Twin-Turbo H6', '443', '15', '2023'),
+        ('V013', 'Subaru Outback', 'Grey', '2.5L H4', '175', '23', '2022'),
+        ('V014', 'Mazda CX-5', 'Red', '2.5L I4', '187', '24', '2021'),
+        ('V015', 'Chrysler Pacifica', 'Red', '3.6L V6', '287', '25', '2023'),
+        ('V016', 'BMW 3 Series', 'Blue', '2.0L I4 Turbo', '255', '27', '2023'),
+        ('V017', 'Ford F-150', 'Black', '3.5L EcoBoost V6', '400', '28', '2022'),
+        ('V018', 'Hyundai Elantra', 'Silver', '2.0L I4', '147', '29', '2023')
     ])
 
     # Insert sample data for veh_info with new fields
     cursor.execute('SELECT COUNT(*) FROM veh_inv')
     if cursor.fetchone()[0] == 0:
         cursor.executemany('''
-        INSERT INTO veh_inv (veh_inv_id, veh_id, condition, miles_used, price, special_notes, image_url, location)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO veh_inv (veh_inv_id, veh_id, condition, miles_used, price, inventory_count, special_notes, image_url, location)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', [
-            ('INV001', 'V001', 'Used', 15000, 79999.99, 'A high-performance electric sedan with impressive range and cutting-edge technology.', 'https://media.ed.edmunds-media.com/tesla/model-s/2024/oem/2024_tesla_model-s_sedan_plaid_fq_oem_1_815.jpg', 'Philadelphia, PA'),
-            ('INV002', 'V002', 'Used', 30000, 60999.99, 'A luxury midsize SUV combining style, comfort, and sport performance for any adventure.', 'https://cache.bmwusa.com/cosy.arox?pov=walkaround&brand=WBBM&vehicle=25XO&client=byoc&paint=P0300&fabric=FKPSW&sa=S01CE,S01SF,S0255,S02TB,S0302,S0319,S0322,S03AT,S03MB,S0402,S0420,S0423,S0459,S0481,S0494,S04FL,S04KR,S04T8,S04UR,S0552,S05AC,S05AS,S05DM,S0676,S06AC,S06AK,S06C4,S06CP,S06NX,S06U2,S0775&angle=30', 'Pittsburgh, PA'),
-            ('INV003', 'V003', 'New', 25000, 35999.99, 'A classic American muscle car known for its powerful V8 engine and iconic design.', 'https://i.ytimg.com/vi/lEn1jZKgXB4/sddefault.jpg', 'Allentown, PA'),
-            ('INV004', 'V004', 'New', 20000, 45999.99, 'A compact luxury sedan offering high-end tech, a smooth ride, and a powerful engine.', 'https://cdn.max.auto/t_hres/110026/WAUEAAF40RN006977/665662925eacd0c1522d7c44.jpg', 'Harrisburg, PA'),
-            ('INV005', 'V005', 'New', 5000, 84999.99, 'A performance-oriented sports car that embodies American engineering with thrilling speed and agility.', 'https://media.carsandbids.com/cdn-cgi/image/width=2080,quality=70/da4b9237bacccdf19c0760cab7aec4a8359010b0/photos/3zVDVjgP-bWZFfp5WaV2-A47-9Vmg57.jpg?t=165308031771', 'Scranton, PA'),
-            ('INV006', 'V006', 'Used', 10000, 55999.99, 'A luxurious compact sedan that offers precision engineering, advanced safety, and premium comfort.', 'https://vehicle-photos-published.vauto.com/04/3f/40/ce-30ec-4c28-b65d-00284ef63a5d/image-2.jpg', 'Lancaster, PA'),
-            ('INV007', 'V007', 'Used', 15000, 23999.99, 'A reliable compact car with great fuel efficiency, a comfortable interior, and sleek design.', 'https://www.motortrend.com/uploads/sites/5/2015/04/Honda-Civic-Concept-front-end-03.jpg', 'Reading, PA'),
-            ('INV008', 'V008', 'Used', 18000, 27999.99, 'A midsize sedan known for its reliability, comfort, and excellent fuel efficiency.', 'https://vehicle-images.dealerinspire.com/f70e-110007893/4T1DBADK6SU501169/31884f6ef3bcf63a9e1a16826f93c432.jpg', 'Bethlehem, PA'),
-            ('INV009', 'V009', 'Used', 22000, 28999.99, 'A stylish midsize sedan offering excellent safety features, technology, and a smooth ride.', 'https://vehicle-images.dealerinspire.com/2451-110005012/1N4BL4DV3SN303721/58cb63ca27eee6aaa3d42d214eec6837.jpg', 'Easton, PA'),
-            ('INV010', 'V010', 'Used', 12000, 70999.99, 'A performance-focused luxury sports car combining a stunning design with immense power and handling precision.', 'https://www.marinoperformancemotors.com/imagetag/12929/4/l/Used-2016-Jaguar-F-TYPE-S.jpg', 'York, PA'),
-            ('INV011', 'V011', 'Used', 27000, 60999.99, 'A premium crossover SUV offering luxury features, smooth performance, and top-tier safety ratings.', 'https://www.kbb.com/wp-content/uploads/2022/11/2023-lexus-rx350-f-sport-front-left-3qtr.jpg', 'King of Prussia, PA'),
-            ('INV012', 'V012', 'Used', 3000, 99999.99, 'An iconic sports car with stunning performance and handling, and a timeless design.', 'https://i.ytimg.com/vi/qnhuEveXoM8/maxresdefault.jpg', 'Chester, PA'),
-            ('INV013', 'V013', 'Used', 32000, 35999.99, 'A rugged and versatile crossover SUV ideal for outdoor adventures with all-wheel drive and ample cargo space.', 'https://i.ytimg.com/vi/-grrSULw9hk/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLARiMzy9YuDE4wkvVcoQ9OsKsLenw', 'Pottstown, PA'),
-            ('INV014', 'V014', 'Used', 22000, 37999.99, 'A compact crossover with exceptional handling, a premium interior, and great fuel economy.', 'https://www.carpro.com/hs-fs/hubfs/img-6688-1404x1112.jpg?width=1020&name=img-6688-1404x1112.jpg', 'West Chester, PA'),
-            ('INV015', 'V015', 'Used', 15000, 42999.99, 'A family-friendly minivan offering ample seating, cargo space, and a hybrid option for better fuel efficiency.', 'https://www.chrysler.com/content/dam/fca-brands/na/chrysler/en_us/2024/pacifica/hybrid/gallery/desktop/my24-chrysler-hybrid-gallery-04-exterior-desktop.jpg.image.1440.jpg', 'Huntingdon Valley, PA'),
-            ('INV016', 'V016', 'Used', 24000, 47999.99, 'A compact luxury sedan known for its dynamic driving experience and sophisticated interior.', 'https://www.edmunds.com/assets/m/cs/bltfd77bfe883e04cf6/66562cab0d6347db0279febf/2025_BMW_3-series_3_1600.jpg', 'New Hope, PA'),
-            ('INV017', 'V017', 'Used', 28000, 55999.99, 'A powerful and versatile full-size pickup truck designed for heavy-duty tasks and off-road adventures.', 'https://vehicle-images.dealerinspire.com/ab52-110005802/1FTEW2KP2RKE17566/4d23121092bc21826489ad899274c080.jpg', 'Media, PA'),
-            ('INV018', 'V018', 'Used', 15000, 21999.99, 'A compact sedan offering a modern design, advanced tech features, and great fuel economy at an affordable price.', 'https://di-uploads-pod27.dealerinspire.com/patrickhyundai/uploads/2022/12/2023-Hyundai-ELANTRA_900x450.jpg', 'Lebanon, PA')
+            ('INV001', 'V001', 'Used', 15000, 79999.99, 1, 'A high-performance electric sedan with impressive range and cutting-edge technology.', 'https://media.ed.edmunds-media.com/tesla/model-s/2024/oem/2024_tesla_model-s_sedan_plaid_fq_oem_1_815.jpg', 'Philadelphia, PA'),
+            ('INV002', 'V002', 'Used', 30000, 60999.99, 2,'A luxury midsize SUV combining style, comfort, and sport performance for any adventure.', 'https://cache.bmwusa.com/cosy.arox?pov=walkaround&brand=WBBM&vehicle=25XO&client=byoc&paint=P0300&fabric=FKPSW&sa=S01CE,S01SF,S0255,S02TB,S0302,S0319,S0322,S03AT,S03MB,S0402,S0420,S0423,S0459,S0481,S0494,S04FL,S04KR,S04T8,S04UR,S0552,S05AC,S05AS,S05DM,S0676,S06AC,S06AK,S06C4,S06CP,S06NX,S06U2,S0775&angle=30', 'Pittsburgh, PA'),
+            ('INV003', 'V003', 'New', 25000, 35999.99, 1,'A classic American muscle car known for its powerful V8 engine and iconic design.', 'https://i.ytimg.com/vi/lEn1jZKgXB4/sddefault.jpg', 'Allentown, PA'),
+            ('INV004', 'V004', 'New', 20000, 45999.99, 1, 'A compact luxury sedan offering high-end tech, a smooth ride, and a powerful engine.', 'https://cdn.max.auto/t_hres/110026/WAUEAAF40RN006977/665662925eacd0c1522d7c44.jpg', 'Harrisburg, PA'),
+            ('INV005', 'V005', 'New', 5000, 84999.99, 1,'A performance-oriented sports car that embodies American engineering with thrilling speed and agility.', 'https://media.carsandbids.com/cdn-cgi/image/width=2080,quality=70/da4b9237bacccdf19c0760cab7aec4a8359010b0/photos/3zVDVjgP-bWZFfp5WaV2-A47-9Vmg57.jpg?t=165308031771', 'Scranton, PA'),
+            ('INV006', 'V006', 'Used', 10000, 55999.99, 2, 'A luxurious compact sedan that offers precision engineering, advanced safety, and premium comfort.', 'https://vehicle-photos-published.vauto.com/04/3f/40/ce-30ec-4c28-b65d-00284ef63a5d/image-2.jpg', 'Lancaster, PA'),
+            ('INV007', 'V007', 'Used', 15000, 23999.99, 1, 'A reliable compact car with great fuel efficiency, a comfortable interior, and sleek design.', 'https://www.motortrend.com/uploads/sites/5/2015/04/Honda-Civic-Concept-front-end-03.jpg', 'Reading, PA'),
+            ('INV008', 'V008', 'Used', 18000, 27999.99, 1, 'A midsize sedan known for its reliability, comfort, and excellent fuel efficiency.', 'https://vehicle-images.dealerinspire.com/f70e-110007893/4T1DBADK6SU501169/31884f6ef3bcf63a9e1a16826f93c432.jpg', 'Bethlehem, PA'),
+            ('INV009', 'V009', 'Used', 22000, 28999.99, 1, 'A stylish midsize sedan offering excellent safety features, technology, and a smooth ride.', 'https://vehicle-images.dealerinspire.com/2451-110005012/1N4BL4DV3SN303721/58cb63ca27eee6aaa3d42d214eec6837.jpg', 'Easton, PA'),
+            ('INV010', 'V010', 'Used', 12000, 70999.99, 1, 'A performance-focused luxury sports car combining a stunning design with immense power and handling precision.', 'https://www.marinoperformancemotors.com/imagetag/12929/4/l/Used-2016-Jaguar-F-TYPE-S.jpg', 'York, PA'),
+            ('INV011', 'V011', 'Used', 27000, 60999.99, 1, 'A premium crossover SUV offering luxury features, smooth performance, and top-tier safety ratings.', 'https://www.kbb.com/wp-content/uploads/2022/11/2023-lexus-rx350-f-sport-front-left-3qtr.jpg', 'King of Prussia, PA'),
+            ('INV012', 'V012', 'Used', 3000, 99999.99, 1, 'An iconic sports car with stunning performance and handling, and a timeless design.', 'https://i.ytimg.com/vi/qnhuEveXoM8/maxresdefault.jpg', 'Chester, PA'),
+            ('INV013', 'V013', 'Used', 32000, 35999.99, 1, 'A rugged and versatile crossover SUV ideal for outdoor adventures with all-wheel drive and ample cargo space.', 'https://i.ytimg.com/vi/-grrSULw9hk/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLARiMzy9YuDE4wkvVcoQ9OsKsLenw', 'Pottstown, PA'),
+            ('INV014', 'V014', 'Used', 22000, 37999.99, 1, 'A compact crossover with exceptional handling, a premium interior, and great fuel economy.', 'https://www.carpro.com/hs-fs/hubfs/img-6688-1404x1112.jpg?width=1020&name=img-6688-1404x1112.jpg', 'West Chester, PA'),
+            ('INV015', 'V015', 'Used', 15000, 42999.99, 1, 'A family-friendly minivan offering ample seating, cargo space, and a hybrid option for better fuel efficiency.', 'https://www.chrysler.com/content/dam/fca-brands/na/chrysler/en_us/2024/pacifica/hybrid/gallery/desktop/my24-chrysler-hybrid-gallery-04-exterior-desktop.jpg.image.1440.jpg', 'Huntingdon Valley, PA'),
+            ('INV016', 'V016', 'Used', 24000, 47999.99, 1, 'A compact luxury sedan known for its dynamic driving experience and sophisticated interior.', 'https://www.edmunds.com/assets/m/cs/bltfd77bfe883e04cf6/66562cab0d6347db0279febf/2025_BMW_3-series_3_1600.jpg', 'New Hope, PA'),
+            ('INV017', 'V017', 'Used', 28000, 55999.99, 1, 'A powerful and versatile full-size pickup truck designed for heavy-duty tasks and off-road adventures.', 'https://vehicle-images.dealerinspire.com/ab52-110005802/1FTEW2KP2RKE17566/4d23121092bc21826489ad899274c080.jpg', 'Media, PA'),
+            ('INV018', 'V018', 'Used', 15000, 21999.99, 1, 'A compact sedan offering a modern design, advanced tech features, and great fuel economy at an affordable price.', 'https://di-uploads-pod27.dealerinspire.com/patrickhyundai/uploads/2022/12/2023-Hyundai-ELANTRA_900x450.jpg', 'Lebanon, PA')
         ])
 
     # Insert sample data for sale_camp
@@ -293,61 +300,61 @@ def init_db():
             VALUES (?, ?, ?)
         ''', [
             # Black Friday Sale
-            ('BF2024', 'INV001', 79999.99 * 0.90),  # 10% off
-            ('BF2024', 'INV002', 60999.99 * 0.90),
-            ('BF2024', 'INV003', 35999.99 * 0.90),
-            ('BF2024', 'INV004', 45999.99 * 0.90),
-            ('BF2024', 'INV006', 55999.99 * 0.90),
-            ('BF2024', 'INV007', 23999.99 * 0.90),
-            ('BF2024', 'INV008', 27999.99 * 0.90),
-            ('BF2024', 'INV009', 28999.99 * 0.90),
-            ('BF2024', 'INV010', 70999.99 * 0.90),
-            ('BF2024', 'INV011', 60999.99 * 0.90),
-            ('BF2024', 'INV012', 99999.99 * 0.90),
-            ('BF2024', 'INV013', 35999.99 * 0.90),
-            ('BF2024', 'INV014', 37999.99 * 0.90),
-            ('BF2024', 'INV015', 42999.99 * 0.90),
-            ('BF2024', 'INV016', 47999.99 * 0.90),
-            ('BF2024', 'INV017', 55999.99 * 0.90),
-            ('BF2024', 'INV018', 21999.99 * 0.90),
+            ('BF2024', 'INV001', round(79999.99 * 0.90, 2)),  # 10% off
+            ('BF2024', 'INV002', round(60999.99 * 0.90, 2)),
+            ('BF2024', 'INV003', round(35999.99 * 0.90, 2)),
+            ('BF2024', 'INV004', round(45999.99 * 0.90, 2)),
+            ('BF2024', 'INV006', round(55999.99 * 0.90, 2)),
+            ('BF2024', 'INV007', round(23999.99 * 0.90, 2)),
+            ('BF2024', 'INV008', round(27999.99 * 0.90, 2)),
+            ('BF2024', 'INV009', round(28999.99 * 0.90, 2)),
+            ('BF2024', 'INV010', round(70999.99 * 0.90, 2)),
+            ('BF2024', 'INV011', round(60999.99 * 0.90, 2)),
+            ('BF2024', 'INV012', round(99999.99 * 0.90, 2)),
+            ('BF2024', 'INV013', round(35999.99 * 0.90, 2)),
+            ('BF2024', 'INV014', round(37999.99 * 0.90, 2)),
+            ('BF2024', 'INV015', round(42999.99 * 0.90, 2)),
+            ('BF2024', 'INV016', round(47999.99 * 0.90, 2)),
+            ('BF2024', 'INV017', round(55999.99 * 0.90, 2)),
+            ('BF2024', 'INV018', round(21999.99 * 0.90, 2)),
 
             # Memorial Day Sale
-            ('MD2024', 'INV001', 79999.99 * 0.95),  # 5% off
-            ('MD2024', 'INV002', 60999.99 * 0.95),
-            ('MD2024', 'INV003', 35999.99 * 0.95),
-            ('MD2024', 'INV004', 45999.99 * 0.95),
-            ('MD2024', 'INV006', 55999.99 * 0.95),
-            ('MD2024', 'INV007', 23999.99 * 0.95),
-            ('MD2024', 'INV008', 27999.99 * 0.95),
-            ('MD2024', 'INV009', 28999.99 * 0.95),
-            ('MD2024', 'INV010', 70999.99 * 0.95),
-            ('MD2024', 'INV011', 60999.99 * 0.95),
-            ('MD2024', 'INV012', 99999.99 * 0.95),
-            ('MD2024', 'INV013', 35999.99 * 0.95),
-            ('MD2024', 'INV014', 37999.99 * 0.95),
-            ('MD2024', 'INV015', 42999.99 * 0.95),
-            ('MD2024', 'INV016', 47999.99 * 0.95),
-            ('MD2024', 'INV017', 55999.99 * 0.95),
-            ('MD2024', 'INV018', 21999.99 * 0.95),
+            ('MD2024', 'INV001', round(79999.99 * 0.95, 2)),  # 5% off
+            ('MD2024', 'INV002', round(60999.99 * 0.95, 2)),
+            ('MD2024', 'INV003', round(35999.99 * 0.95, 2)),
+            ('MD2024', 'INV004', round(45999.99 * 0.95, 2)),
+            ('MD2024', 'INV006', round(55999.99 * 0.95, 2)),
+            ('MD2024', 'INV007', round(23999.99 * 0.95, 2)),
+            ('MD2024', 'INV008', round(27999.99 * 0.95, 2)),
+            ('MD2024', 'INV009', round(28999.99 * 0.95, 2)),
+            ('MD2024', 'INV010', round(70999.99 * 0.95, 2)),
+            ('MD2024', 'INV011', round(60999.99 * 0.95, 2)),
+            ('MD2024', 'INV012', round(99999.99 * 0.95, 2)),
+            ('MD2024', 'INV013', round(35999.99 * 0.95, 2)),
+            ('MD2024', 'INV014', round(37999.99 * 0.95, 2)),
+            ('MD2024', 'INV015', round(42999.99 * 0.95, 2)),
+            ('MD2024', 'INV016', round(47999.99 * 0.95, 2)),
+            ('MD2024', 'INV017', round(55999.99 * 0.95, 2)),
+            ('MD2024', 'INV018', round(21999.99 * 0.95, 2)),
 
             # Thanksgiving Sale
-            ('TG2024', 'INV001', 79999.99 * 0.85),  # 15% off
-            ('TG2024', 'INV002', 60999.99 * 0.85),
-            ('TG2024', 'INV003', 35999.99 * 0.85),
-            ('TG2024', 'INV004', 45999.99 * 0.85),
-            ('TG2024', 'INV006', 55999.99 * 0.85),
-            ('TG2024', 'INV007', 23999.99 * 0.85),
-            ('TG2024', 'INV008', 27999.99 * 0.85),
-            ('TG2024', 'INV009', 28999.99 * 0.85),
-            ('TG2024', 'INV010', 70999.99 * 0.85),
-            ('TG2024', 'INV011', 60999.99 * 0.85),
-            ('TG2024', 'INV012', 99999.99 * 0.85),
-            ('TG2024', 'INV013', 35999.99 * 0.85),
-            ('TG2024', 'INV014', 37999.99 * 0.85),
-            ('TG2024', 'INV015', 42999.99 * 0.85),
-            ('TG2024', 'INV016', 47999.99 * 0.85),
-            ('TG2024', 'INV017', 55999.99 * 0.85),
-            ('TG2024', 'INV018', 21999.99 * 0.85)
+            ('TG2024', 'INV001', round(79999.99 * 0.85, 2)),  # 15% off
+            ('TG2024', 'INV002', round(60999.99 * 0.85, 2)),
+            ('TG2024', 'INV003', round(35999.99 * 0.85, 2)),
+            ('TG2024', 'INV004', round(45999.99 * 0.85, 2)),
+            ('TG2024', 'INV006', round(55999.99 * 0.85, 2)),
+            ('TG2024', 'INV007', round(23999.99 * 0.85, 2)),
+            ('TG2024', 'INV008', round(27999.99 * 0.85, 2)),
+            ('TG2024', 'INV009', round(28999.99 * 0.85, 2)),
+            ('TG2024', 'INV010', round(70999.99 * 0.85, 2)),
+            ('TG2024', 'INV011', round(60999.99 * 0.85, 2)),
+            ('TG2024', 'INV012', round(99999.99 * 0.85, 2)),
+            ('TG2024', 'INV013', round(35999.99 * 0.85, 2)),
+            ('TG2024', 'INV014', round(37999.99 * 0.85, 2)),
+            ('TG2024', 'INV015', round(42999.99 * 0.85, 2)),
+            ('TG2024', 'INV016', round(47999.99 * 0.85, 2)),
+            ('TG2024', 'INV017', round(55999.99 * 0.85, 2)),
+            ('TG2024', 'INV018', round(21999.99 * 0.85, 2))
         ])
 
     conn.commit()
@@ -394,11 +401,12 @@ def get_cars():
     conn = get_db_connection()
     # Fetch all car details from veh_info and veh_inv tables, joining on veh_id
     query = '''
-    SELECT veh_inv.veh_inv_id, veh_info.veh_id, veh_info.veh_name, veh_info.ext_color, veh_info.horsepower, veh_info.mileage, 
+    SELECT veh_inv.veh_inv_id, veh_info.veh_id, veh_info.veh_name, veh_info.ext_color, veh_info.horsepower, veh_inv.miles_used as mileage, 
         veh_inv.condition, veh_inv.price, veh_inv.inventory_count, veh_inv.special_notes, veh_inv.image_url,
         veh_info.year, veh_inv.location
     FROM veh_info
     LEFT JOIN veh_inv ON veh_info.veh_id = veh_inv.veh_id
+    WHERE veh_inv.inventory_count > 0
     '''
     cars = conn.execute(query).fetchall()
     conn.close()
@@ -411,12 +419,13 @@ def get_car_details(car_id):
     # Fetch detailed car info by ID, joining both tables
     query = '''
     SELECT veh_info.veh_id, veh_info.veh_name, veh_info.ext_color, 
-            veh_info.horsepower, veh_info.mileage, veh_inv.condition, veh_inv.miles_used, 
+            veh_info.horsepower, veh_inv.miles_used as mileage, veh_inv.condition, 
             veh_inv.price, veh_inv.inventory_count, veh_inv.special_notes, veh_inv.image_url, 
            veh_info.year, veh_info.engine, veh_inv.location
     FROM veh_info
     LEFT JOIN veh_inv ON veh_info.veh_id = veh_inv.veh_id
     WHERE veh_info.veh_id = ?
+    AND veh_inv.inventory_count > 0
     '''
     car = conn.execute(query, (car_id,)).fetchone()
     conn.close()
@@ -674,6 +683,7 @@ def search_cars():
         LEFT JOIN veh_inv ON veh_info.veh_id = veh_inv.veh_id
         LEFT JOIN sale_camp_detailed ON veh_inv.veh_id = sale_camp_detailed.veh_inv_id AND sale_camp_detailed.campaign_price IS NOT NULL
         WHERE LOWER(veh_info.veh_name) LIKE ?
+        AND veh_inv.inventory_count > 0
     '''
 
     # Add the year filter if provided
@@ -718,20 +728,59 @@ def process_payment():
         credit_card = payment_data.get('credit_card')
         expiration = payment_data.get('expiration')
         cvv = payment_data.get('cvv')
+        emp_id = 'emp00'
+
+        conn = get_db_connection()
+        current_date = datetime.now().strftime('%Y-%m-%d')
+
+        # Check if the vehicle is on sale and fetch the sale price
+        sale_info = conn.execute('''
+            SELECT d.campaign_id 
+            FROM sale_camp s
+            JOIN sale_camp_detailed d ON s.campaign_id = d.campaign_id
+            WHERE d.veh_inv_id = ? AND s.start_dt <= ? AND s.end_dt >= ?
+        ''', (veh_inv_id, current_date, current_date)).fetchone()
+
+        conn.close()
+
+        if sale_info:
+            campaign_id = sale_info['campaign_id']
+        else:
+            campaign_id = None
 
         # Validate input (you might want to add more checks here)
         if not veh_inv_id or not cust_id or not price or not credit_card or not expiration or not cvv:
             return jsonify({"success": False, "message": "Missing payment information"}), 400
 
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Step 2: Check if the vehicle exists in the inventory
+        cursor.execute('SELECT inventory_count FROM veh_inv WHERE veh_inv_id = ?', (veh_inv_id,))
+        car = cursor.fetchone()
+
+        if car is None or car[0] == 0:
+            # If the car doesn't exist or is sold out, return an error message
+            return jsonify({"success": False, "message": "Car has been sold out"}), 400
+
         # Process the payment here (e.g., call an external payment API or simulate success)
         # For this example, we'll assume the payment was successful.
 
         # Add transaction record to database (replace this with your actual DB logic)
-        transaction_id = str(random.randint(1000000000, 9999999999))  # Simulate transaction ID
+        conn = get_db_connection()
+        dupe = True
+        while dupe:
+            transaction_id = str(random.randint(1000000000, 9999999999))  # Simulate transaction ID
+            cursor.execute('SELECT transaction_id FROM purchases WHERE transaction_id = ?', (transaction_id,))
+            if cursor.fetchone() is None:
+                dupe = False
+        conn.close()
 
         # Update inventory to remove car after purchase (this part will depend on your DB setup)
-        # Ensure car exists in inventory before deleting it
+        # Ensure car exists in inventory before removing 1 from the inventory
         delete_car_from_inventory(veh_inv_id)
+
+        complete_purchase(transaction_id, veh_inv_id, cust_id, campaign_id, emp_id, price, credit_card, expiration, cvv)
 
         return jsonify({"success": True, "transaction_id": transaction_id}), 200
 
@@ -747,7 +796,7 @@ def delete_car_from_inventory(veh_inv_id):
         cursor = conn.cursor()
 
         # Step 2: Check if the vehicle exists in the inventory
-        cursor.execute('SELECT * FROM veh_inv WHERE veh_inv_id = ?', (veh_inv_id,))
+        cursor.execute('SELECT inventory_count FROM veh_inv WHERE veh_inv_id = ?', (veh_inv_id,))
         car = cursor.fetchone()
 
         if car is None:
@@ -755,17 +804,17 @@ def delete_car_from_inventory(veh_inv_id):
             print(f"Vehicle with ID {veh_inv_id} does not exist in the inventory.")
             return False  # Car not found
 
-        # Step 3: If the car exists, delete it from the inventory
-        cursor.execute('DELETE FROM veh_inv WHERE veh_inv_id = ?', (veh_inv_id,))
+        # Step 3: Decrease the inventory count by 1
+        cursor.execute('UPDATE veh_inv SET inventory_count = inventory_count - 1 WHERE veh_inv_id = ?', (veh_inv_id,))
         conn.commit()
 
         # Step 4: Success message
-        print(f"Vehicle with ID {veh_inv_id} has been removed from inventory.")
-        return True  # Car successfully deleted
+        print(f"Vehicle with ID {veh_inv_id} inventory count has been decreased by 1.")
+        return True  # Inventory count successfully updated
 
     except sqlite3.Error as e:
         # Handle any database-related errors
-        print(f"Error while deleting vehicle with ID {veh_inv_id}: {e}")
+        print(f"Error while updating inventory count for vehicle with ID {veh_inv_id}: {e}")
         return False  # Return False if there was an error
 
     finally:
@@ -787,31 +836,22 @@ def confirmation():
         return 'Error: Transaction ID not found.', 400
     
 @app.route('/api/complete_purchase', methods=['POST'])
-def complete_purchase():
+def complete_purchase(transaction_id, veh_inv_id, cust_id, campaign_id, emp_id, price, credit_card, expiration, cvv):
     try:
         # Get the request data
         data = request.get_json()
-
-        veh_inv_id = data['car_id']
-        cust_id = data['user_id']
-        price = data['price']
-        credit_card = data['credit_card']
-        expiration = data['expiration']
-        cvv = data['cvv']
-
         # Simulate payment processing here (you can use a real payment gateway like Stripe or another service)
 
         # Assuming payment was successful, create a transaction record
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO purchases (veh_inv_id, cust_id, price, credit_card, expiration, cvv, transaction_date)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (veh_inv_id, cust_id, price, credit_card, expiration, cvv, datetime.now()))
+            INSERT INTO purchases (transaction_id, cust_id, emp_id, veh_inv_id, campaign_id, price, credit_card, expiration, cvv, transaction_date, payment_status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (transaction_id, cust_id, emp_id, veh_inv_id, campaign_id, price, credit_card, expiration, cvv, datetime.now(), 'Successful'))
         conn.commit()
-        transaction_id = cursor.lastrowid
         conn.close()
-
+        print("Transaction completed successfully. with values:", transaction_id, veh_inv_id, cust_id, campaign_id, emp_id, price, credit_card, expiration, cvv)
         # Respond with success
         return jsonify({'success': True, 'transaction_id': transaction_id})
 
