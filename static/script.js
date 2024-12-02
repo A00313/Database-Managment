@@ -220,7 +220,10 @@ function displayCars(cars) {
     carResultsDiv.innerHTML = cars.slice(0, 5).map(car => {
         let salePriceHtml = '';
         let oldPriceHtml = '';
-
+        if (!car || !car.price || isNaN(car.price)) {
+            console.warn('Invalid car data:', car);
+            return '';
+        }
         if (car.sale_price) {
             salePriceHtml = `<span class="sale-price" style="color: red;">$${car.sale_price.toFixed(2)}</span>`;
             oldPriceHtml = `<span class="old-price" style="text-decoration: line-through; color: grey;">$${car.price.toFixed(2)}</span>`;

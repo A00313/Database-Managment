@@ -731,7 +731,7 @@ def process_payment():
 
         # Update inventory to remove car after purchase (this part will depend on your DB setup)
         # Ensure car exists in inventory before deleting it
-        delete_car_from_inventory(car_id)
+        delete_car_from_inventory(veh_inv_id)
 
         return jsonify({"success": True, "transaction_id": transaction_id}), 200
 
