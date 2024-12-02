@@ -104,6 +104,62 @@ def init_db():
         DROP TABLE IF EXISTS veh_inv
     ''')
 
+    cursor.execute('''
+        DROP TABLE IF EXISTS emp_info
+    ''')
+
+    # Create employee information table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS emp_info
+        (
+        emp_id VARCHAR(10),
+        f_name VARCHAR(20),
+        l_name VARCHAR(20),
+        email VARCHAR(50),
+        phone_num VARCHAR(20),
+        office_hours VARCHAR(200),
+        emp_intro VARCHAR(1000),
+        emp_status VARCHAR(10),
+        image_url VARCHAR(200),
+        PRIMARY KEY (emp_id)
+        )
+    ''')
+
+    # Insert sample data for emp_info
+    cursor.execute('SELECT COUNT(*) FROM emp_info')
+    if cursor.fetchone()[0] == 0:
+        cursor.executemany('''
+            INSERT INTO emp_info (emp_id, f_name, l_name, email, phone_num, office_hours, emp_intro, emp_status, image_url)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', [('emp0', 'online', 'online', 'online@example.com', '123-456-7890', 'N/A', 'This is for online sales', 'active', 
+              'no_url'),
+              ('emp1', 'John', 'Doe', 'JohnDoe@example.com', '123-456-7890', 'Mon-Fri: 9am-5pm', 
+              "John Doe brings years of expertise and a passion for cars to every customer interaction. Whether you’re searching for the latest models or a dependable pre-owned vehicle, John is dedicated to finding the right fit for your lifestyle and budget. Known for his straightforward advice and exceptional customer care, John ensures a hassle-free buying experience from start to finish.", 'active',
+              'https://media.gettyimages.com/id/1919265357/photo/close-up-portrait-of-confident-businessman-standing-in-office.jpg?s=2048x2048&w=gi&k=20&c=Y0-O4sl85iNuYPC9U4PEagLOOuGOC0xHWnhR_YOSJYk='),
+              ('emp2', 'Jane', 'Smith', 'JaneSmith@example.com', '987-654-3210', 'Mon-Fri: 11am-8pm', 
+              "With over a decade of experience, Jane Smith is dedicated to helping you find the perfect car for your needs and budget. Known for her friendly approach and expert knowledge, she creates a stress-free, transparent buying experience. Whether you’re after a brand-new model or a reliable pre-owned vehicle, Jane ensures you drive away happy.", 'active',
+              'https://media.gettyimages.com/id/945061408/photo/portrait-of-beautiful-young-businesswoman.jpg?s=2048x2048&w=gi&k=20&c=GRrW26Eu7NE23TsmZJNinnn-EqL-G2EpdHti6qS2Xh8='),
+              ('emp3', 'Bob', 'Johnson', 'BobJohnson@example.com', '555-555-5555', 'Mon-Fri: 12PM-5pm', 
+              "Bob Johnson is a knowledgeable and approachable car specialist with a passion for matching people with the perfect vehicle. With a focus on understanding your unique needs, Bob provides honest advice and ensures a smooth, enjoyable car-buying experience. Whether it’s a sleek sedan, a rugged truck, or anything in between, Bob is here to guide you every step of the way.", 'active',
+              'https://media.gettyimages.com/id/1179420343/photo/smiling-man-outdoors-in-the-city.jpg?s=2048x2048&w=gi&k=20&c=A5rKi_wYh0EL2Xv3GHSIzEwG9TyralNq_CjoSXIzfb8='),
+              ('emp4', 'Alice', 'Williams', 'AliceWilliams@example.com', '111-222-3333', 'Mon-Fri: 8am-3pm', 
+              "Alice Williams is dedicated to making your car-buying journey simple, enjoyable, and stress-free. With her deep industry knowledge and a knack for understanding her customers' needs, Alice takes the time to find the perfect car for your lifestyle and budget. From first-time buyers to seasoned drivers, she offers personalized guidance every step of the way. ", 'active',
+              'https://media.gettyimages.com/id/831902150/photo/ive-solidified-my-name-in-the-business-world.jpg?s=2048x2048&w=gi&k=20&c=zajbxqgcyLEhKdhwwHo0bHIcsyP0WEEefTsZnxSfe14=')
+        ])
+
+    # Create vehicle information table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS veh_info (
+            veh_id VARCHAR(10) PRIMARY KEY,
+            veh_name VARCHAR(50),
+            ext_color VARCHAR(20),
+            horsepower VARCHAR(10),
+            mileage VARCHAR(10),
+            year INTEGER NOT NULL,
+            engine TEXT NOT NULL
+            )
+    ''')
+
     # Create veicle inventory table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS veh_inv 
@@ -119,19 +175,6 @@ def init_db():
             location VARCHAR(20),
             PRIMARY KEY (veh_inv_id),
             FOREIGN KEY (veh_id) REFERENCES veh_info
-            )
-    ''')
-
-    # Create vehicle information table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS veh_info (
-            veh_id VARCHAR(10) PRIMARY KEY,
-            veh_name VARCHAR(50),
-            ext_color VARCHAR(20),
-            horsepower VARCHAR(10),
-            mileage VARCHAR(10),
-            year INTEGER NOT NULL,
-            engine TEXT NOT NULL
             )
     ''')
 
@@ -158,17 +201,21 @@ def init_db():
         )
     ''')
 
-    # Create sale campaign details table
+    # Create purchase table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS purchases (
             transaction_id SERIAL PRIMARY KEY,
-            user_id INT NOT NULL,
-            car_id INT NOT NULL,
+            cust_id VARCHAR(10),
+            emp_id VARCHAR(10),
+            veh_inv_id VARCHAR(10),
+            campaign_id VARCHAR(10),
             price DECIMAL(10, 2) NOT NULL,
             payment_status VARCHAR(50) DEFAULT 'pending',
             transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (car_id) REFERENCES cars(veh_id),
-            FOREIGN KEY (user_id) REFERENCES users(user_id)
+            FOREIGN KEY (veh_inv_id) REFERENCES veh_inv(veh_inv_id),
+            FOREIGN KEY (cust_id) REFERENCES cust_info(cust_id),
+            FOREIGN KEY (emp_id) REFERENCES emp_info(emp_id),
+            FOREIGN KEY (campaign_id) REFERENCES sale_camp(campaign_id)
         );
     ''')
 
@@ -665,15 +712,15 @@ def process_payment():
         # Get the payment data from the request
         payment_data = request.get_json()
 
-        car_id = payment_data.get('car_id')
-        user_id = payment_data.get('user_id')
+        veh_inv_id = payment_data.get('car_id')
+        cust_id = payment_data.get('user_id')
         price = payment_data.get('price')
         credit_card = payment_data.get('credit_card')
         expiration = payment_data.get('expiration')
         cvv = payment_data.get('cvv')
 
         # Validate input (you might want to add more checks here)
-        if not car_id or not user_id or not price or not credit_card or not expiration or not cvv:
+        if not veh_inv_id or not cust_id or not price or not credit_card or not expiration or not cvv:
             return jsonify({"success": False, "message": "Missing payment information"}), 400
 
         # Process the payment here (e.g., call an external payment API or simulate success)
@@ -745,8 +792,8 @@ def complete_purchase():
         # Get the request data
         data = request.get_json()
 
-        car_id = data['car_id']
-        user_id = data['user_id']
+        veh_inv_id = data['car_id']
+        cust_id = data['user_id']
         price = data['price']
         credit_card = data['credit_card']
         expiration = data['expiration']
@@ -758,9 +805,9 @@ def complete_purchase():
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO purchases (car_id, user_id, price, credit_card, expiration, cvv, transaction_date)
+            INSERT INTO purchases (veh_inv_id, cust_id, price, credit_card, expiration, cvv, transaction_date)
             VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (car_id, user_id, price, credit_card, expiration, cvv, datetime.now()))
+        ''', (veh_inv_id, cust_id, price, credit_card, expiration, cvv, datetime.now()))
         conn.commit()
         transaction_id = cursor.lastrowid
         conn.close()
@@ -771,7 +818,6 @@ def complete_purchase():
     except Exception as e:
         print("Error processing payment:", e)
         return jsonify({'success': False, 'message': 'Payment failed. Please try again.'}), 500
-
 
 @app.route('/payment')
 def payment():
@@ -785,6 +831,79 @@ def home():
 def cars():
     return render_template('cars.html')
 
+# Employee list page
+@app.route('/employees')
+def employees():
+    return render_template('employee.html')
+
+# Employee detail page
+@app.route('/employee/<emp_id>')
+def employee_detail(emp_id):
+    return render_template('employee_detail.html')
+
+# API endpoint to get all employees
+@app.route('/api/employees')
+def get_employees():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Ignore employee 0 (online)
+    cursor.execute('''
+        SELECT emp_id, f_name, l_name, email, phone_num, office_hours, emp_intro, image_url
+        FROM emp_info
+        WHERE emp_status = 'active'
+        AND emp_id <> 'emp0'
+    ''')
+    
+    employees = cursor.fetchall()
+    conn.close()
+    
+    # Convert employees to list of dictionaries
+    employee_list = []
+    for emp in employees:
+        employee_list.append({
+            'id': emp['emp_id'],
+            'first_name': emp['f_name'],
+            'last_name': emp['l_name'],
+            'email': emp['email'],
+            'phone_number': emp['phone_num'],
+            'office_hours': emp['office_hours'],
+            'intro': emp['emp_intro'],
+            'image_url': emp['image_url']
+        })
+    
+    return jsonify(employee_list)
+
+# API endpoint to get specific employee details
+@app.route('/api/employee/<emp_id>')
+def get_employee(emp_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        SELECT emp_id, f_name, l_name, email, phone_num, office_hours, emp_intro, image_url
+        FROM emp_info
+        WHERE emp_id = ? AND emp_status = 'active'
+    ''', (emp_id,))
+    
+    emp = cursor.fetchone()
+    conn.close()
+    
+    if emp is None:
+        return jsonify({'error': 'Employee not found'}), 404
+    
+    employee_data = {
+        'id': emp['emp_id'],
+        'first_name': emp['f_name'],
+        'last_name': emp['l_name'],
+        'email': emp['email'],
+        'phone_number': emp['phone_num'],
+        'office_hours': emp['office_hours'],
+        'intro': emp['emp_intro'],
+        'image_url': emp['image_url']
+    }
+    
+    return jsonify(employee_data)
 
 if __name__ == '__main__':
     init_db()  # Initialize the database with tables and data

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+<header class="header">
+    <div id="menu-btn" class="fas fa-bars"></div>
+    <a href="/" class="logo"> <span>Cars</span>Zone </a>
+    <nav class="navbar">
+        <a href="/#home">home</a>
+        <a href="/#services">services</a>
+        <a href="/#newsletter">Search Car</a>
+        <a href="/#contact">contact</a>
+        <a href="javascript:void(0);" onclick="fetchCars()">Cars</a>
+        <a href="/employees">Employees</a>
+    </nav>
+    <div id="login-btn">
+        <a href="/login" class="btn">login</a>
+        <i class="far fa-user"></i>
+    </div>
+</header>
+
+<section class="employee-detail-section">
+    <div class="employee-detail-card">
+        <img id="employeeImage" src="" alt="Employee Photo">
+        <h2 id="employeeName"></h2>
+        
+        <div class="contact-info">
+            <p><i class="fas fa-phone"></i> <span id="employeePhone"></span></p>
+            <p><i class="fas fa-envelope"></i> <span id="employeeEmail"></span></p>
+        </div>
+
+        <div class="employee-detail-info">
+            <div class="info-section">
+                <h3><i class="fas fa-clock"></i> Office Hours</h3>
+                <p id="employeeHours"></p>
+            </div>
+
+            <div class="info-section">
+                <h3><i class="fas fa-user-tie"></i> About Me</h3>
+                <p id="employeeIntro"></p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    async function loadEmployeeDetails() {
+        try {
+            const employeeId = window.location.pathname.split('/').pop();
+            const response = await fetch(`/api/employee/${employeeId}`);
+            const employee = await response.json();
+            
+            document.getElementById('employeeImage').src = employee.image_url;
+            document.getElementById('employeeImage').alt = `${employee.first_name} ${employee.last_name}`;
+            document.getElementById('employeeName').textContent = `${employee.first_name} ${employee.last_name}`;
+            document.getElementById('employeePhone').textContent = employee.phone_number;
+            document.getElementById('employeeEmail').textContent = employee.email;
+            document.getElementById('employeeHours').textContent = employee.office_hours;
+            document.getElementById('employeeIntro').textContent = employee.intro;
+        } catch (error) {
+            console.error('Error loading employee details:', error);
+        }
+    }
+
+    window.addEventListener('load', loadEmployeeDetails);
+</script>
+
+</body>
+</html>
