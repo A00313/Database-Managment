@@ -358,41 +358,6 @@ def init_db():
     conn.commit()
     conn.close()
 
-# API endpoint to get users
-
-
-@app.route('/api/users', methods=['GET'])
-def get_users():
-    conn = get_db_connection()
-    users = conn.execute('SELECT * FROM users').fetchall()
-    conn.close()
-    return jsonify([dict(user) for user in users])
-
-# API endpoint to get products
-
-
-@app.route('/api/products', methods=['GET'])
-def get_products():
-    conn = get_db_connection()
-    products = conn.execute('SELECT * FROM products').fetchall()
-    conn.close()
-    return jsonify([dict(product) for product in products])
-
-# API endpoint to get orders
-
-
-@app.route('/api/orders', methods=['GET'])
-def get_orders():
-    conn = get_db_connection()
-    orders = conn.execute('''
-        SELECT orders.id, users.name, products.name AS product_name, orders.quantity
-        FROM orders
-        JOIN users ON orders.user_id = users.id
-        JOIN products ON orders.product_id = products.id
-    ''').fetchall()
-    conn.close()
-    return jsonify([dict(order) for order in orders])
-
 # API endpoint to get all cars (from veh_info table)
 @app.route('/api/cars', methods=['GET'])
 def get_cars():
@@ -468,10 +433,23 @@ def get_vehicle_sale(veh_inv_id):
 
 @app.route("/")
 def connect():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT COUNT(*) as count FROM emp_info WHERE emp_id <> "emp0"')
+    employee_count = cursor.fetchone()['count']
+    cursor.execute('SELECT SUM(inventory_count) as count FROM veh_inv')
+    vehicle_count = cursor.fetchone()['count']
+    cursor.execute('SELECT COUNT(*) as count FROM cust_info')
+    customer_count = cursor.fetchone()['count']
+    cursor.execute('SELECT COUNT(*) as count FROM purchases')
+    transaction_count = cursor.fetchone()['count']
+    conn.close()
+
     if current_user_id:
         current_user = get_username(current_user_id)
-        return render_template("index.html").replace('var currentUser = null;', f'var currentUser = "{current_user}";')
-    return render_template("index.html")
+        return render_template('index.html', employee_count=employee_count, vehicle_count=vehicle_count, customer_count=customer_count, transaction_count=transaction_count).replace('var currentUser = null;', f'var currentUser = "{current_user}";')
+    return render_template('index.html', employee_count=employee_count, vehicle_count=vehicle_count, customer_count=customer_count, transaction_count=transaction_count)
+
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -862,10 +840,6 @@ def payment():
     if not current_user_id:
         return redirect(url_for('login'))
     return render_template('payment.html')
-
-@app.route('/home')
-def home():
-    return render_template('index.html')
 
 @app.route('/cars')
 def cars():
