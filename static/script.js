@@ -118,6 +118,8 @@ async function viewCarDetails(carId, carInvId) {
     }
 }
 
+let currentCars = [];  // Global variable to store the current cars list
+
 // Function to handle search cars
 async function searchCars() {
     currentPage = 'products';  // Track that we're on the "search cars" page
@@ -139,6 +141,7 @@ async function searchCars() {
         const cars = await response.json();
 
         if (cars.length > 0) {
+            currentCars = cars;  // Store the fetched cars in the global variable
             displayCars(cars);
         } else {
             carResultsDiv.innerHTML = '<p>No cars found matching your query.</p>';
@@ -180,6 +183,20 @@ function displayCars(cars) {
         `;
     }).join('');
 }
+
+// Function to sort the cars array based on price
+function sortCars(order) {
+    // If no option is selected, return and do nothing
+    if (!order) return;
+
+    if (order === 'asc') {
+        currentCars.sort((a, b) => a.price - b.price);  // Sort ascending by price
+    } else if (order === 'desc') {
+        currentCars.sort((a, b) => b.price - a.price);  // Sort descending by price
+    }
+    displayCars(currentCars);  // Re-render the sorted cars
+}
+
 
 // Function to clear search input and filters
 function clearSearch() {
