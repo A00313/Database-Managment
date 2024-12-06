@@ -211,6 +211,7 @@ def init_db():
             veh_inv_id VARCHAR(10),
             campaign_id VARCHAR(10),
             price DECIMAL(10, 2) NOT NULL,
+            quantity INT NOT NULL,
             payment_status VARCHAR(50) DEFAULT 'pending',
             transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             credit_card VARCHAR(20),
@@ -757,7 +758,7 @@ def process_payment():
         cursor.execute('UPDATE veh_inv SET inventory_count = inventory_count - ? WHERE veh_inv_id = ?', (quantity, veh_inv_id))
         conn.commit()
 
-        complete_purchase(transaction_id, veh_inv_id, cust_id, campaign_id, emp_id, price, credit_card, expiration, cvv)
+        complete_purchase(transaction_id, veh_inv_id, cust_id, campaign_id, emp_id, price, quantity, credit_card, expiration, cvv)
 
         return jsonify({"success": True, "transaction_id": transaction_id}), 200
 
@@ -780,7 +781,7 @@ def confirmation():
         return 'Error: Transaction ID not found.', 400
     
 @app.route('/api/complete_purchase', methods=['POST'])
-def complete_purchase(transaction_id, veh_inv_id, cust_id, campaign_id, emp_id, price, credit_card, expiration, cvv):
+def complete_purchase(transaction_id, veh_inv_id, cust_id, campaign_id, emp_id, price, quantity, credit_card, expiration, cvv):
     try:
         # Get the request data
         data = request.get_json()
@@ -790,12 +791,12 @@ def complete_purchase(transaction_id, veh_inv_id, cust_id, campaign_id, emp_id, 
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO purchases (transaction_id, cust_id, emp_id, veh_inv_id, campaign_id, price, credit_card, expiration, cvv, transaction_date, payment_status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (transaction_id, cust_id, emp_id, veh_inv_id, campaign_id, price, credit_card, expiration, cvv, datetime.now(), 'Successful'))
+            INSERT INTO purchases (transaction_id, cust_id, emp_id, veh_inv_id, campaign_id, price, quantity, credit_card, expiration, cvv, transaction_date, payment_status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (transaction_id, cust_id, emp_id, veh_inv_id, campaign_id, price, quantity, credit_card, expiration, cvv, datetime.now(), 'Successful'))
         conn.commit()
         conn.close()
-        print("Transaction completed successfully. with values:", transaction_id, veh_inv_id, cust_id, campaign_id, emp_id, price, credit_card, expiration, cvv)
+        print("Transaction completed successfully. with values:", transaction_id, veh_inv_id, cust_id, campaign_id, emp_id, price, quantity, credit_card, expiration, cvv)
         # Respond with success
         return jsonify({'success': True, 'transaction_id': transaction_id})
 
@@ -900,6 +901,7 @@ def order_history():
             p.transaction_id as transaction_id, 
             p.price as price, 
             p.transaction_date as date,
+            p.quantity as quantity,
             v.veh_name as vehicle, 
             v.ext_color as color, 
             v.year as year
