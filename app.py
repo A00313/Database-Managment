@@ -705,7 +705,7 @@ def process_payment():
         payment_data = request.get_json()
 
         veh_inv_id = payment_data.get('car_id')
-        cust_id = payment_data.get('user_id')
+        cust_id = current_user_id
         price = payment_data.get('price')
         quantity = payment_data.get('quantity')
         credit_card = payment_data.get('credit_card')
