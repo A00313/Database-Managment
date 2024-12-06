@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order History</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        table {
+            width: 100%;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #2d87f0;
+            color: white;
+        }
+        .no-orders {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 30px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div id="menu-btn" class="fas fa-bars"></div>
+        <a href="/" class="logo"> <span>Cars</span>Zone </a>
+        <nav class="navbar">
+            <a href="/#home">home</a>
+            <a href="/#services">services</a>
+            <a href="/#newsletter">Search Car</a>
+            <a href="/#contact">contact</a>
+            <a href="/cars">Cars</a>
+            <a href="/employees">Employees</a>
+        </nav>
+    </header>
+
+    <div class="auth-container">
+        <h2>Order History</h2>
+        {% if purchases %}
+        <table>
+            <tr>
+                <th>Transaction ID</th>
+                <th>Vehicle</th>
+                <th>Price</th>
+                <th>Date</th>
+            </tr>
+            {% for p in purchases %}
+            <tr>
+                <td>{{ p.transaction_id }}</td>
+                <td>{{ p.year }} {{ p.vehicle }} ({{ p.color }})</td>
+                <td>${{ p.price }}</td>
+                <td>{{ p.date }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <div class="no-orders">
+            No purchase history available.
+        </div>
+        {% endif %}
+        <div class="auth-link">
+            <a href="/account">Return to Account</a>
+        </div>
+    </div>
+</body>
+</html>

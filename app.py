@@ -84,7 +84,6 @@ def init_db():
         )
     ''')
 
-    
     # Table drop to ensure data is not duplicated
     cursor.execute('''
         DROP TABLE IF EXISTS veh_info
@@ -430,7 +429,6 @@ def get_vehicle_sale(veh_inv_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
 @app.route("/")
 def connect():
     conn = get_db_connection()
@@ -469,6 +467,7 @@ def login():
         if user:
             global current_user_id
             current_user_id = user['login_id']
+            print(f"Current user ID: {current_user_id}")
             return redirect('/account')
         else:
             # Redirect to login page with error parameter
@@ -699,7 +698,7 @@ def process_payment():
         payment_data = request.get_json()
 
         veh_inv_id = payment_data.get('car_id')
-        cust_id = payment_data.get('user_id')
+        cust_id = current_user_id
         price = payment_data.get('price')
         credit_card = payment_data.get('credit_card')
         expiration = payment_data.get('expiration')
@@ -918,6 +917,34 @@ def get_employee(emp_id):
     }
     
     return jsonify(employee_data)
+
+@app.route('/order_history')
+def order_history():
+    if not current_user_id:
+        return redirect('/login')
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        SELECT 
+            p.transaction_id as transaction_id, 
+            p.price as price, 
+            p.transaction_date as date,
+            v.veh_name as vehicle, 
+            v.ext_color as color, 
+            v.year as year
+        FROM purchases p
+        JOIN veh_inv vi ON p.veh_inv_id = vi.veh_inv_id
+        JOIN veh_info v ON vi.veh_id = v.veh_id
+        WHERE p.cust_id = ?
+        ORDER BY p.transaction_date DESC
+    ''', (current_user_id,))
+    
+    purchases = cursor.fetchall()
+    conn.close()
+    
+    return render_template('order_history.html', purchases=purchases)
 
 if __name__ == '__main__':
     init_db()  # Initialize the database with tables and data
