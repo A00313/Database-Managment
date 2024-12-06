@@ -162,6 +162,13 @@
             <option value="50000-75000">$50,000 - $75,000</option>
             <option value="75000-100000">Above $75,000</option>
         </select>
+
+        <!-- Sale Filter Toggle -->
+        <label for="on-sale-filter">
+            <input type="checkbox" id="on-sale-filter">
+            Only show cars on sale
+        </label>
+
         <!-- Replace the two buttons with a dropdown for sorting -->
         <select id="price-sort" onchange="sortCars(this.value)">
             <option value="">Sort by Price</option>
@@ -169,11 +176,11 @@
             <option value="desc">Descending</option>
         </select>
 
-
         <button onclick="searchCars()">Search</button>
         <button class="clear-btn" onclick="clearSearch()">Clear Search</button>
    </div>
 </section>
+
 
 <!-- Display Cars -->
 <div id="car-results"></div> <!-- Results will be displayed here -->

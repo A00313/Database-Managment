@@ -127,17 +127,19 @@ async function searchCars() {
     const query = document.getElementById('search-query').value.trim().toLowerCase();
     const selectedYear = document.getElementById('year-filter').value;
     const selectedPriceRange = document.getElementById('price-filter').value;
+    const isOnSale = document.getElementById('on-sale-filter').checked;  // Get the status of the "on sale" toggle
 
     const carResultsDiv = document.getElementById('car-results');
     carResultsDiv.innerHTML = '';  // Clear current car list
 
-    if (query === '' && selectedYear === '' && selectedPriceRange === '') {
+    if (query === '' && selectedYear === '' && selectedPriceRange === '' && !isOnSale) {
         carResultsDiv.innerHTML = '<p>Please enter a search term or select filters.</p>';
         return;
     }
 
     try {
-        const response = await fetch(`http://127.0.0.1:5000/api/cars/search?query=${encodeURIComponent(query)}&year=${encodeURIComponent(selectedYear)}&price_range=${encodeURIComponent(selectedPriceRange)}`);
+        // Include the sale filter in the query string
+        const response = await fetch(`http://127.0.0.1:5000/api/cars/search?query=${encodeURIComponent(query)}&year=${encodeURIComponent(selectedYear)}&price_range=${encodeURIComponent(selectedPriceRange)}&on_sale=${isOnSale}`);
         const cars = await response.json();
 
         if (cars.length > 0) {
@@ -197,14 +199,15 @@ function sortCars(order) {
     displayCars(currentCars);  // Re-render the sorted cars
 }
 
-
 // Function to clear search input and filters
 function clearSearch() {
     document.getElementById('search-query').value = '';
     document.getElementById('year-filter').value = '';
     document.getElementById('price-filter').value = '';
+    document.getElementById('on-sale-filter').checked = false;  // Clear the "on sale" toggle
     document.getElementById('car-results').innerHTML = '';
 }
+
 
 // Function to close the car details and return to the correct list
 function closeCarDetails() {

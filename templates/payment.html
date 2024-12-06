@@ -101,9 +101,16 @@
             <h3>Payment Summary</h3>
             <p><strong>Car:</strong> <span id="payment-car-name"></span></p>
             <p><strong>Price:</strong> $<span id="payment-car-price"></span></p>
+            <p><strong>Inventory Count:</strong> <span id="inventory-count"></span></p>
         </div>
 
         <form id="payment-form">
+            <div class="form-group">
+                <label for="quantity">Quantity</label>
+                <input type="number" id="quantity" name="quantity" min="1" value="1" required>
+                <span id="quantity-error" style="color: red; display: none;">Not enough inventory available.</span>
+            </div>
+
             <div class="form-group">
                 <label for="credit-card">Credit Card Number</label>
                 <input type="text" id="credit-card" name="credit-card" placeholder="Enter your card number" 
@@ -131,13 +138,21 @@
 
     <script>
         // Populate payment summary
-        window.onload = () => {
+        window.onload = async () => {
             const urlParams = new URLSearchParams(window.location.search);
-            document.getElementById('payment-car-name').innerText = urlParams.get('car_name');
-            document.getElementById('payment-car-price').innerText = urlParams.get('car_price');
+            const carId = urlParams.get('car_id');
+            const carName = urlParams.get('car_name');
+            const carPrice = urlParams.get('car_price');
+
+            document.getElementById('payment-car-name').innerText = carName;
+            document.getElementById('payment-car-price').innerText = carPrice;
+
+            // Fetch inventory count
+            const response = await fetch(`/api/get_inventory?car_id=${carId}`);
+            const data = await response.json();
+            document.getElementById('inventory-count').innerText = data.inventory_count;
         };
 
-        // Handle payment submission
         // Handle payment submission
         document.getElementById('payment-form').onsubmit = async function(e) {
             e.preventDefault();
@@ -145,12 +160,25 @@
             const carId = new URLSearchParams(window.location.search).get('car_id');
             const userId = 1; // Assuming user ID is 1 for demo purposes
             const carPrice = document.getElementById('payment-car-price').innerText;
+            const quantity = parseInt(document.getElementById('quantity').value);
+
+            // Get the available inventory count
+            const availableInventory = parseInt(document.getElementById('inventory-count').innerText);
+
+            // If the requested quantity exceeds available inventory, show error
+            if (quantity > availableInventory) {
+                document.getElementById('quantity-error').style.display = 'inline';
+                return;
+            } else {
+                document.getElementById('quantity-error').style.display = 'none';
+            }
 
             // Create payment data object
             const paymentData = {
                 car_id: carId,
                 user_id: userId,
                 price: carPrice,
+                quantity: quantity,
                 credit_card: document.getElementById('credit-card').value,
                 expiration: document.getElementById('expiration').value,
                 cvv: document.getElementById('cvv').value
@@ -172,10 +200,11 @@
                 window.location.href = `/confirmation?transaction_id=${result.transaction_id}`;
             } else {
                 // Show error message
-                alert('Payment failed. Please try again.');
+                alert('Payment failed. Please try again. Make sure quantity is available');
             }
         };
 
     </script>
 </body>
+
 </html>

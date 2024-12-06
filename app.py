@@ -644,9 +644,10 @@ def search_cars():
     query = request.args.get('query', '').lower()  # Get the search query
     year = request.args.get('year', '')  # Get the year filter
     price_range = request.args.get('price_range', '')  # Get the price range filter
+    on_sale = request.args.get('on_sale', 'false').lower() == 'true'  # Check if the 'on_sale' filter is true
 
     # If there's no query, year, or price range, return empty result
-    if not query and not year and not price_range:
+    if not query and not year and not price_range and not on_sale:
         return jsonify([])
 
     # Build the SQL query for partial matching with optional filters
@@ -674,6 +675,10 @@ def search_cars():
         else:
             query_str += ' AND veh_inv.price < ?'
 
+    # If the on_sale filter is true, add condition to check for sale_price
+    if on_sale:
+        query_str += ' AND sale_camp_detailed.campaign_price IS NOT NULL'
+
     query_str += ' LIMIT 5'  # Limit to top 5 results
 
     # Execute the query with the search term, optional year, and price range filter
@@ -684,6 +689,8 @@ def search_cars():
         cars = conn.execute(query_str, ('%' + query + '%', year)).fetchall()
     elif price_range:
         cars = conn.execute(query_str, ('%' + query + '%', min_price, max_price)).fetchall()
+    elif on_sale:
+        cars = conn.execute(query_str, ('%' + query + '%',)).fetchall()  # Just the query and on_sale filter
     else:
         cars = conn.execute(query_str, ('%' + query + '%',)).fetchall()
     conn.close()
@@ -698,8 +705,9 @@ def process_payment():
         payment_data = request.get_json()
 
         veh_inv_id = payment_data.get('car_id')
-        cust_id = current_user_id
+        cust_id = payment_data.get('user_id')
         price = payment_data.get('price')
+        quantity = payment_data.get('quantity')
         credit_card = payment_data.get('credit_card')
         expiration = payment_data.get('expiration')
         cvv = payment_data.get('cvv')
@@ -723,78 +731,39 @@ def process_payment():
         else:
             campaign_id = None
 
-        # Validate input (you might want to add more checks here)
-        if not veh_inv_id or not cust_id or not price or not credit_card or not expiration or not cvv:
+        # Validate input
+        if not veh_inv_id or not cust_id or not price or not quantity or not credit_card or not expiration or not cvv:
             return jsonify({"success": False, "message": "Missing payment information"}), 400
 
+        # Check inventory count
         conn = get_db_connection()
         cursor = conn.cursor()
-
-        # Step 2: Check if the vehicle exists in the inventory
         cursor.execute('SELECT inventory_count FROM veh_inv WHERE veh_inv_id = ?', (veh_inv_id,))
         car = cursor.fetchone()
 
-        if car is None or car[0] == 0:
-            # If the car doesn't exist or is sold out, return an error message
-            return jsonify({"success": False, "message": "Car has been sold out"}), 400
+        if car is None or car[0] < quantity:
+            # If not enough inventory, return error
+            return jsonify({"success": False, "message": "Not enough inventory for the selected quantity."}), 400
 
-        # Process the payment here (e.g., call an external payment API or simulate success)
-        # For this example, we'll assume the payment was successful.
-
-        # Add transaction record to database (replace this with your actual DB logic)
-        conn = get_db_connection()
+        # Process the payment (simulated here)
         dupe = True
         while dupe:
             transaction_id = str(random.randint(1000000000, 9999999999))  # Simulate transaction ID
             cursor.execute('SELECT transaction_id FROM purchases WHERE transaction_id = ?', (transaction_id,))
             if cursor.fetchone() is None:
                 dupe = False
-        conn.close()
 
-        # Update inventory to remove car after purchase (this part will depend on your DB setup)
-        # Ensure car exists in inventory before removing 1 from the inventory
-        delete_car_from_inventory(veh_inv_id)
+        # Update inventory
+        cursor.execute('UPDATE veh_inv SET inventory_count = inventory_count - ? WHERE veh_inv_id = ?', (quantity, veh_inv_id))
+        conn.commit()
 
         complete_purchase(transaction_id, veh_inv_id, cust_id, campaign_id, emp_id, price, credit_card, expiration, cvv)
 
         return jsonify({"success": True, "transaction_id": transaction_id}), 200
 
     except Exception as e:
-        # Log the error and return a generic failure response
         print(f"Error during payment processing: {e}")
         return jsonify({"success": False, "message": "Payment processing failed"}), 500
-
-def delete_car_from_inventory(veh_inv_id):
-    try:
-        # Step 1: Connect to the database
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        # Step 2: Check if the vehicle exists in the inventory
-        cursor.execute('SELECT inventory_count FROM veh_inv WHERE veh_inv_id = ?', (veh_inv_id,))
-        car = cursor.fetchone()
-
-        if car is None:
-            # If the car doesn't exist, return an error message
-            print(f"Vehicle with ID {veh_inv_id} does not exist in the inventory.")
-            return False  # Car not found
-
-        # Step 3: Decrease the inventory count by 1
-        cursor.execute('UPDATE veh_inv SET inventory_count = inventory_count - 1 WHERE veh_inv_id = ?', (veh_inv_id,))
-        conn.commit()
-
-        # Step 4: Success message
-        print(f"Vehicle with ID {veh_inv_id} inventory count has been decreased by 1.")
-        return True  # Inventory count successfully updated
-
-    except sqlite3.Error as e:
-        # Handle any database-related errors
-        print(f"Error while updating inventory count for vehicle with ID {veh_inv_id}: {e}")
-        return False  # Return False if there was an error
-
-    finally:
-        # Step 5: Close the database connection
-        conn.close()
 
 
 @app.route('/confirmation')
