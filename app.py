@@ -284,7 +284,7 @@ def init_db():
         INSERT INTO sale_camp (campaign_id, campaign_desc, start_dt, end_dt)
         VALUES (?, ?, ?, ?)
     ''', [
-            ('BF2024', 'Black Friday Sale - Huge discounts on all vehicles.', '2024-11-29', '2024-12-02'),
+            ('BF2024', 'Black Friday Sale - Huge discounts on all vehicles.', '2024-11-29', '2024-12-08'),
             ('MD2024', 'Memorial Day Sale - Save big on top models this Memorial Day.', '2024-05-25', '2024-05-28'),
             ('TG2024', 'Thanksgiving Sale - Special offers on luxury and family cars.', '2024-11-22', '2024-11-25')
         ])

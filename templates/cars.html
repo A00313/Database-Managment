@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="/static/style.css">
 </head>
+
 <body>
     <header class="header">
         <div id="menu-btn" class="fas fa-bars"></div>
@@ -27,6 +29,7 @@
             padding: 0;
             background-color: #f4f4f4;
         }
+
         .back-button {
             position: fixed;
             top: 20px;
@@ -39,6 +42,7 @@
             border-radius: 5px;
             font-size: 1em;
         }
+
         .back-button:hover {
             background-color: #1a5bb3;
         }
@@ -47,6 +51,7 @@
             width: 80%;
             margin: 120px auto 20px auto;
         }
+
         .car-card {
             display: inline-block;
             width: 30%;
@@ -59,30 +64,36 @@
             box-sizing: border-box;
             height: 500px;
         }
+
         .car-card img {
             width: 100%;
             height: 250px;
             object-fit: cover;
             border-radius: 8px;
         }
+
         .car-card h3 {
             font-size: 1.5em;
             margin: 10px 0;
         }
+
         .car-card .price {
             font-size: 1.2em;
             color: green;
             font-weight: bold;
         }
+
         .car-card .old-price {
             text-decoration: line-through;
             color: grey;
         }
+
         .car-card .sale-price {
             color: red;
             font-size: 1.5em;
             font-weight: bold;
         }
+
         .car-card .details-btn {
             background-color: #2d87f0;
             color: white;
@@ -93,6 +104,7 @@
             border-radius: 5px;
             text-align: center;
         }
+
         .car-card .details-btn:hover {
             background-color: #1a5bb3;
         }
@@ -155,59 +167,189 @@
             background-color: rgba(0, 0, 0, 0.5);
             z-index: 999;
         }
+
         .car-image-large {
             width: 800px;
             height: 400px;
             object-fit: cover;
         }
+
+        button {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            width: 200px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        /* Styling for the dropdown container */
+        .container select {
+            width: 250px;
+            /* Set a width for the dropdown */
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            appearance: none;
+            /* Remove default styling of the dropdown */
+            outline: none;
+            position: relative;
+        }
+
+        /* Border and shadow effect on hover */
+        .container select:hover {
+            border-color: #1a5bb3;
+        }
+
+        /* Focus effect */
+        .container select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        /* Label for the dropdown */
+        .container label {
+            font-size: 1.2rem;
+            margin-right: 15px;
+            color: #333;
+        }
+
+        /* Style the dropdown arrow */
+        .container select::-ms-expand {
+            display: none;
+        }
+
+        /* Custom arrow for modern browsers */
+        .container select::after {
+            content: ' ▼';
+            /* Custom arrow */
+            font-size: 1.2rem;
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        /* Style for the dropdown options */
+        .container select option {
+            padding: 10px;
+            background-color: #fff;
+            color: #333;
+            font-size: 1rem;
+            border: none;
+        }
+
+        /* Hover effect for options */
+        .container select option:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* Responsive design: Dropdown on smaller screens */
+        @media (max-width: 768px) {
+            .container select {
+                width: 100%;
+                /* Make it full width on smaller screens */
+            }
+        }
     </style>
-</head>
-<body>
+    </head>
 
-<div class="container">
-    <h1>Available Cars</h1>
-    <div id="car-list"></div>
-</div>
+    <body>
 
-<!-- Full-Screen Modal for Car Details -->
-<div id="overlay" onclick="closeCarDetails()"></div>
+        <div class="container">
+            <div>
+                <!-- Dropdown for sorting -->
+                <label for="sortPrice">Sort by Price: </label>
+                <select id="sortPrice" onchange="sortCars(this.value)">
+                    <option value="">Select</option>
+                    <option value="asc">Ascending</option>
+                    <option value="desc">Descending</option>
+                </select>
+            </div>
+            <h1>Available Cars</h1>
+            <div id="car-list"></div>
+        </div>
 
-<div id="car-details-section">
-    <div id="car-details" class="car-details-card"></div>
-</div>
+        <!-- Full-Screen Modal for Car Details -->
+        <div id="overlay" onclick="closeCarDetails()"></div>
 
-<script>
-    async function fetchCars() {
-        try {
-            const response = await fetch('http://127.0.0.1:5000/api/cars');
-            const cars = await response.json();
+        <div id="car-details-section">
+            <div id="car-details" class="car-details-card"></div>
+        </div>
 
-            if (Array.isArray(cars) && cars.length > 0) {
+        <script>
+            let allCars = [];  // Global variable to store fetched cars
+
+            // Function to fetch cars from the API
+            async function fetchCars() {
+                try {
+                    const response = await fetch('http://127.0.0.1:5000/api/cars');
+                    const cars = await response.json();
+
+                    if (Array.isArray(cars) && cars.length > 0) {
+                        allCars = cars;  // Store the fetched cars
+                        await fetchSaleData();  // Fetch the sale data
+                        displayCars(allCars);  // Display cars after sale data is fetched
+                    } else {
+                        document.getElementById('car-list').innerHTML = '<p>No cars available at the moment.</p>';
+                    }
+                } catch (error) {
+                    console.error('Error fetching cars:', error);
+                    document.getElementById('car-list').innerHTML = `<p class="error">Error fetching cars: ${error.message}</p>`;
+                }
+            }
+
+            // Fetch sale data (campaign price) for each car
+            async function fetchSaleData() {
+                // Fetch sale prices for each car and update the car objects
+                const salePromises = allCars.map(async (car) => {
+                    try {
+                        const saleResponse = await fetch(`http://127.0.0.1:5000/api/car_sale/${car.veh_inv_id}`);
+                        const saleData = await saleResponse.json();
+                        if (saleData.campaign_price && !isNaN(saleData.campaign_price)) {
+                            car.campaignPrice = saleData.campaign_price;
+                        }
+                    } catch (error) {
+                        console.error(`Error fetching sale data for ${car.veh_inv_id}:`, error);
+                    }
+                });
+
+                // Wait for all sale data fetches to complete
+                await Promise.all(salePromises);
+            }
+
+            // Function to display the list of cars
+            function displayCars(cars) {
                 const carListDiv = document.getElementById('car-list');
-                carListDiv.innerHTML = '';
+                carListDiv.innerHTML = '';  // Clear current car list
 
-                for (let car of cars) {
+                cars.forEach(car => {
                     let salePriceHtml = '';
                     let oldPriceHtml = '';
 
                     if (!car || !car.price || isNaN(car.price)) {
                         console.warn('Invalid car data:', car);
-                        continue;
+                        return;
                     }
 
-                    let campaignPrice = null;
-                    try {
-                        const saleResponse = await fetch(`http://127.0.0.1:5000/api/car_sale/${car.veh_inv_id}`);
-                        const saleData = await saleResponse.json();
-                        if (saleData.campaign_price && !isNaN(saleData.campaign_price)) {
-                            campaignPrice = saleData.campaign_price;
-                        }
-                    } catch (error) {
-                        console.error(`Error fetching sale data for ${car.veh_inv_id}: ${error}`);
-                    }
-
-                    if (campaignPrice) {
-                        salePriceHtml = `<div class="sale-price">$${campaignPrice.toFixed(2)}</div>`;
+                    if (car.campaignPrice) {
+                        salePriceHtml = `<div class="sale-price">$${car.campaignPrice.toFixed(2)}</div>`;
                         oldPriceHtml = `<div class="old-price">$${car.price.toFixed(2)}</div>`;
                     } else {
                         salePriceHtml = `<div class="price">$${car.price.toFixed(2)}</div>`;
@@ -227,78 +369,89 @@
                         </div>
                     `;
                     carListDiv.innerHTML += carCard;
-                }
-            } else {
-                document.getElementById('car-list').innerHTML = '<p>No cars available at the moment.</p>';
+                });
             }
-        } catch (error) {
-            console.error('Error fetching cars:', error);
-            document.getElementById('car-list').innerHTML = `<p class="error">Error fetching cars: ${error.message}</p>`;
-        }
-    }
 
-    window.onload = fetchCars;
+            // Function to sort the cars by price (ascending or descending)
+            function sortCars(order) {
+                let sortedCars = [...allCars];  // Clone the cars array to avoid modifying the original
 
-    async function viewCarDetails(carId, carInvId) {
-        try {
-            const response = await fetch(`http://127.0.0.1:5000/api/cars/${carId}`);
-            const car = await response.json();
+                if (order === 'asc') {
+                    sortedCars.sort((a, b) => a.price - b.price);  // Sort in ascending order
+                } else if (order === 'desc') {
+                    sortedCars.sort((a, b) => b.price - a.price);  // Sort in descending order
+                }
 
-            if (car) {
-                let salePriceHtml = '';
-                let oldPriceHtml = '';
-                let salePrice = car.price;
-                let originalPrice = car.price;
+                displayCars(sortedCars);  // Re-render the sorted cars
+            }
 
+            // Function to view car details
+            async function viewCarDetails(carId, carInvId) {
                 try {
-                    const saleResponse = await fetch(`http://127.0.0.1:5000/api/car_sale/${carInvId}`);
-                    const saleData = await saleResponse.json();
-                    if (saleData.campaign_price) {
-                        salePrice = saleData.campaign_price;
-                        oldPriceHtml = `<span class="old-price">$${originalPrice.toFixed(2)}</span>`;
-                        salePriceHtml = `<span class="sale-price">$${salePrice.toFixed(2)}</span>`;
+                    const response = await fetch(`http://127.0.0.1:5000/api/cars/${carId}`);
+                    const car = await response.json();
+
+                    if (car) {
+                        let salePriceHtml = '';
+                        let oldPriceHtml = '';
+                        let salePrice = car.price;
+                        let originalPrice = car.price;
+
+                        try {
+                            const saleResponse = await fetch(`http://127.0.0.1:5000/api/car_sale/${carInvId}`);
+                            const saleData = await saleResponse.json();
+                            if (saleData.campaign_price) {
+                                salePrice = saleData.campaign_price;
+                                oldPriceHtml = `<span class="old-price">$${originalPrice.toFixed(2)}</span>`;
+                                salePriceHtml = `<span class="sale-price">$${salePrice.toFixed(2)}</span>`;
+                            }
+                        } catch (error) {
+                            console.log(`Error fetching sale data for car ${carInvId}:`, error);
+                        }
+
+                        const carDetailsDiv = document.getElementById('car-details');
+                        carDetailsDiv.innerHTML = `
+                            <h2>${car.veh_name} - ${salePriceHtml || `$${salePrice.toFixed(2)}`}</h2>
+                            ${oldPriceHtml}
+                            <br>
+                            <img src="${car.image_url}" alt="${car.veh_name}" class="car-image-large">
+                            <p><strong>Mileage:</strong> ${car.mileage} miles</p>
+                            <p><strong>Color:</strong> ${car.ext_color}</p>
+                            <p><strong>Engine:</strong> ${car.engine}</p>
+                            <p><strong>Horsepower:</strong> ${car.horsepower} hp</p>
+                            <p><strong>Year:</strong> ${car.year}</p>
+                            <p><strong>Location:</strong> ${car.location}</p>
+                            <p><strong>Description:</strong> ${car.special_notes}</p>
+                            <button class="btn" onclick="closeCarDetails()">Close</button>
+                            <button class="btn" id="buy-button" onclick="proceedToPayment('${carInvId}', '${car.veh_name}', '${salePrice}')">Buy Now</button>
+                        `;
+
+                        document.getElementById('car-details-section').style.display = 'block';
+                        document.getElementById('overlay').style.display = 'block';
+                    } else {
+                        alert('Car details not found.');
                     }
                 } catch (error) {
-                    console.log(`Error fetching sale data for car ${carInvId}:`, error);
+                    console.error('Error fetching car details:', error);
+                    alert('Error fetching car details.');
                 }
-
-                const carDetailsDiv = document.getElementById('car-details');
-                carDetailsDiv.innerHTML = `
-                    <h2>${car.veh_name} - ${salePriceHtml || `$${salePrice.toFixed(2)}`}</h2>
-                    ${oldPriceHtml}
-                    <br>
-                    <img src="${car.image_url}" alt="${car.veh_name}" class="car-image-large">
-                    <p><strong>Mileage:</strong> ${car.mileage} miles</p>
-                    <p><strong>Color:</strong> ${car.ext_color}</p>
-                    <p><strong>Engine:</strong> ${car.engine}</p>
-                    <p><strong>Horsepower:</strong> ${car.horsepower} hp</p>
-                    <p><strong>Year:</strong> ${car.year}</p>
-                    <p><strong>Location:</strong> ${car.location}</p>
-                    <p><strong>Description:</strong> ${car.special_notes}</p>
-                    <button class="btn" onclick="closeCarDetails()">Close</button>
-                    <button class="btn" id="buy-button" onclick="proceedToPayment('${carInvId}', '${car.veh_name}', '${salePrice}')">Buy Now</button>
-                `;
-
-                document.getElementById('car-details-section').style.display = 'block';
-                document.getElementById('overlay').style.display = 'block';
-            } else {
-                alert('Car details not found.');
             }
-        } catch (error) {
-            console.error('Error fetching car details:', error);
-            alert('Error fetching car details.');
-        }
-    }
 
-    function closeCarDetails() {
-        document.getElementById('car-details-section').style.display = 'none';
-        document.getElementById('overlay').style.display = 'none';
-    }
+            // Function to close the car details modal
+            function closeCarDetails() {
+                document.getElementById('car-details-section').style.display = 'none';
+                document.getElementById('overlay').style.display = 'none';
+            }
 
-    function proceedToPayment(id, name, price) {
-        window.location.href = `/payment?car_id=${id}&car_name=${encodeURIComponent(name)}&car_price=${encodeURIComponent(price)}`;
-    }
-</script>
+            // Function to proceed to the payment page
+            function proceedToPayment(id, name, price) {
+                window.location.href = `/payment?car_id=${id}&car_name=${encodeURIComponent(name)}&car_price=${encodeURIComponent(price)}`;
+            }
 
-</body>
+            // Fetch cars when the page loads
+            window.onload = fetchCars;
+        </script>
+
+    </body>
+
 </html>
