@@ -365,6 +365,7 @@
                             <div>Year: ${car.year}</div>
                             <div>Condition: ${car.condition}</div>
                             <div>Location: ${car.location}</div>
+                            <div>In Stock: ${car.inventory_count}</div>
                             <button class="details-btn" onclick="viewCarDetails('${car.veh_id}', '${car.veh_inv_id}')">View Details</button>
                         </div>
                     `;
@@ -415,6 +416,7 @@
                             ${oldPriceHtml}
                             <br>
                             <img src="${car.image_url}" alt="${car.veh_name}" class="car-image-large">
+                            <p><strong>In Stock:</strong> ${car.inventory_count}</p>
                             <p><strong>Mileage:</strong> ${car.mileage} miles</p>
                             <p><strong>Color:</strong> ${car.ext_color}</p>
                             <p><strong>Engine:</strong> ${car.engine}</p>
