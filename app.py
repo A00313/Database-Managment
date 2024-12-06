@@ -652,7 +652,7 @@ def search_cars():
     # Build the SQL query for partial matching with optional filters
     query_str = '''
         SELECT veh_info.veh_id, veh_info.veh_name, veh_info.year, veh_inv.price, veh_inv.image_url,
-               veh_info.ext_color, veh_info.horsepower, veh_inv.condition,
+               veh_info.ext_color, veh_info.horsepower, veh_inv.condition, veh_inv.miles_used as mileage,
                sale_camp_detailed.campaign_price AS sale_price
         FROM veh_info
         LEFT JOIN veh_inv ON veh_info.veh_id = veh_inv.veh_id
