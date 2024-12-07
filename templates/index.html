@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -19,244 +20,257 @@
     </script>
 
 </head>
+
 <body>
 
-<header class="header">
+    <header class="header">
 
-    <div id="menu-btn" class="fas fa-bars"></div>
+        <div id="menu-btn" class="fas fa-bars"></div>
 
-    <a href="/" class="logo"> <span>Cars</span>Zone </a>
+        <a href="/" class="logo"> <span>Cars</span>Zone </a>
 
-    <nav class="navbar">
-        <a href="#home">home</a>
-        <a href="#services">services</a>
-        <a href="#newsletter">Search Car</a>
-        <a href="#contact">contact</a>
-        <a href="/cars">Cars</a>
-        <a href="/employees">Employees</a>
-    </nav>
+        <nav class="navbar">
+            <a href="#home">home</a>
+            <a href="#services">services</a>
+            <a href="#newsletter">Search Car</a>
+            <a href="#contact">contact</a>
+            <a href="/cars">Cars</a>
+            <a href="/employees">Employees</a>
+        </nav>
 
-    <div id="login-btn">
-        <a href="/login" class="btn">login</a>
-        <i class="far fa-user"></i>
-    </div>
-
-</header>
-
-<section class="home" id="home">
-
-    <h3 data-speed="-2" class="home-parallax">find your car</h3>
-
-    <img data-speed="5" class="home-parallax" src="/static/image/home-img.png" alt="">
-
-    <a data-speed="7" href="/cars" class="btn home-parallax">explore cars</a>
-
-</section>
-
-<section class="icons-container">
-
-    <div class="icons">
-        <i class="fas fa-users"></i>
-        <div class="content">
-            <h3>{{ employee_count }}</h3>
-            <p>Dedicated Employees</p>
+        <div id="login-btn">
+            <a href="/login" class="btn">login</a>
+            <i class="far fa-user"></i>
         </div>
-    </div>
 
-    <div class="icons">
-        <i class="fas fa-users"></i>
-        <div class="content">
-            <h3>{{customer_count}}</h3>
-            <p>Happy clients</p>
+    </header>
+
+    <section class="home" id="home">
+
+        <h3 data-speed="-2" class="home-parallax">find your car</h3>
+
+        <img data-speed="5" class="home-parallax" src="/static/image/home-img.png" alt="">
+
+        <a data-speed="7" href="/cars" class="btn home-parallax">explore cars</a>
+
+    </section>
+
+    <section class="icons-container">
+
+        <div class="icons">
+            <i class="fas fa-users"></i>
+            <div class="content">
+                <h3>{{ employee_count }}</h3>
+                <p>Dedicated Employees</p>
+            </div>
         </div>
-    </div>
 
-    <div class="icons">
-        <i class="fas fa-car"></i>
-        <div class="content">
-            <h3>{{transaction_count}}</h3>
-            <p>cars sold</p>
+        <div class="icons">
+            <i class="fas fa-users"></i>
+            <div class="content">
+                <h3>{{customer_count}}</h3>
+                <p>Happy clients</p>
+            </div>
         </div>
-    </div>
 
-    <div class="icons">
-        <i class="fas fa-car"></i>
-        <div class="content">
-            <h3>{{vehicle_count}}</h3>
-            <p>Cars in stock</p>
-        </div>
-    </div>
-
-</section>
-
-<section class="services" id="services">
-
-    <h1 class="heading"> our <span>services</span> </h1>
-
-    <div class="box-container">
-
-        <div class="box">
+        <div class="icons">
             <i class="fas fa-car"></i>
-            <h3>car selling</h3>
-            <p>Find your perfect ride – Buy or sell cars effortlessly with us!</p>
+            <div class="content">
+                <h3>{{transaction_count}}</h3>
+                <p>cars sold</p>
+            </div>
         </div>
 
-        <div class="box">
-            <i class="fas fa-tools"></i>
-            <h3>parts repair</h3>
-            <p>Fast, reliable, and affordable parts repair service to get you back on track!</p>
+        <div class="icons">
+            <i class="fas fa-car"></i>
+            <div class="content">
+                <h3>{{vehicle_count}}</h3>
+                <p>Cars in stock</p>
+            </div>
         </div>
 
-        <div class="box">
-            <i class="fas fa-car-crash"></i>
-            <h3>car insurance</h3>
-            <p>Protect your ride with reliable and affordable car insurance – get covered today!</p>
+    </section>
+
+    <section class="services" id="services">
+
+        <h1 class="heading"> our <span>services</span> </h1>
+
+        <div class="box-container">
+
+            <div class="box">
+                <i class="fas fa-car"></i>
+                <h3>car selling</h3>
+                <p>Find your perfect ride – Buy or sell cars effortlessly with us!</p>
+            </div>
+
+            <div class="box">
+                <i class="fas fa-tools"></i>
+                <h3>parts repair</h3>
+                <p>Fast, reliable, and affordable parts repair service to get you back on track!</p>
+            </div>
+
+            <div class="box">
+                <i class="fas fa-car-crash"></i>
+                <h3>car insurance</h3>
+                <p>Protect your ride with reliable and affordable car insurance – get covered today!</p>
+            </div>
+
+            <div class="box">
+                <i class="fas fa-car-battery"></i>
+                <h3>battery replacement</h3>
+                <p>Quick and reliable battery replacement service to keep you powered up!</p>
+            </div>
+
+            <div class="box">
+                <i class="fas fa-gas-pump"></i>
+                <h3>oil change</h3>
+                <p>Keep your engine running smoothly—schedule your quick and affordable oil change today!</p>
+            </div>
+
+            <div class="box">
+                <i class="fas fa-headset"></i>
+                <h3>24/7 support</h3>
+                <p>Get round-the-clock assistance with our 24/7 support service—always here when you need us!</p>
+            </div>
+
         </div>
 
-        <div class="box">
-            <i class="fas fa-car-battery"></i>
-            <h3>battery replacement</h3>
-            <p>Quick and reliable battery replacement service to keep you powered up!</p>
+    </section>
+
+    <section class="newsletter" id="newsletter">
+
+        <h3>Your next car, just a search away!</h3>
+        <p>Find your perfect car effortlessly — Use our smart search bar to explore options in seconds!</p>
+
+        <div>
+            <!-- Search Bar Input -->
+            <input type="text" id="search-query" placeholder="Search cars...">
+
+            <!-- Year Filter -->
+            <select id="year-filter">
+                <option value="">Select Year</option>
+                <option value="2020">2020</option>
+                <option value="2021">2021</option>
+                <option value="2022">2022</option>
+                <option value="2023">2023</option>
+                <option value="2024">2024</option>
+            </select>
+
+            <!-- Price Filter -->
+            <select id="price-filter">
+                <option value="">Select Price Range</option>
+                <option value="0-25000">Under $25,000</option>
+                <option value="25000-50000">$25,000 - $50,000</option>
+                <option value="50000-75000">$50,000 - $75,000</option>
+                <option value="75000-100000">Above $75,000</option>
+            </select>
+
+            <!-- Sale Filter Toggle -->
+            <label for="on-sale-filter">
+                <input type="checkbox" id="on-sale-filter">
+                Only show cars on sale
+            </label>
+
+            <!-- Replace the two buttons with a dropdown for sorting -->
+            <select id="price-sort" onchange="sortCars(this.value)">
+                <option value="">Sort by Price</option>
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+            </select>
+
+            <button onclick="searchCars()">Search</button>
+            <button class="clear-btn" onclick="clearSearch()">Clear Search</button>
+        </div>
+    </section>
+
+            <!-- Overlay Section (Hidden by default) -->
+            <div id="overlay" class="overlay" style="display: none;">
+                <div id="car-details-section" class="car-details-section">
+                    <div id="car-details"></div>
+                    <button class="btn" onclick="closeCarDetails()">Close</button>
+                    <button class="btn" id="buy-button" onclick="proceedToPayment()">Buy Now</button>
+                </div>
+            </div>
+    <!-- Display Cars -->
+    <div id="car-results"></div> <!-- Results will be displayed here -->
+
+    <section class="contact" id="contact">
+
+        <h1 class="heading"><span>contact</span> us</h1>
+
+        <div class="row">
+
+            <iframe class="map"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3036.4474247369876!2d-79.95290792346155!3d40.44663597143837!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8834f229c4913a8f%3A0xc0c5df6e33fb0dbf!2s135%20N%20Bellefield%20Ave%2C%20Pittsburgh%2C%20PA%2015213!5e0!3m2!1sen!2sus!4v1701903072346!5m2!1sen!2sus"
+                style="height: 400px;" allowfullscreen="" loading="lazy"></iframe>
+
+            <div class="info-box">
+                <h2>Address:</h2>
+                <h3>135 N Bellefield Ave, Pittsburgh, PA 15213</h3>
+
+                <h2>Phone Number:</h2>
+                <h3>(412)-224-8598</h3>
+
+                <h2>Sales Hours:</h2>
+                <h3>Mon-Fri: 9:00 AM - 8:00 PM</h3>
+                <h3>Sat: 9:00 AM - 5:00 PM</h3>
+                <h3>Sun: 9:00 AM - 5:00 PM</h3>
+            </div>
+
         </div>
 
-        <div class="box">
-            <i class="fas fa-gas-pump"></i>
-            <h3>oil change</h3>
-            <p>Keep your engine running smoothly—schedule your quick and affordable oil change today!</p>
+    </section>
+
+    <section class="footer" id="footer">
+
+        <div class="box-container">
+
+            <div class="box">
+                <h3>our branches</h3>
+                <a href="#"> <i class="fas fa-map-marker-alt"></i> india </a>
+                <a href="#"> <i class="fas fa-map-marker-alt"></i> japan </a>
+                <a href="#"> <i class="fas fa-map-marker-alt"></i> france </a>
+                <a href="#"> <i class="fas fa-map-marker-alt"></i> russia </a>
+                <a href="#"> <i class="fas fa-map-marker-alt"></i> USA </a>
+            </div>
+
+            <div class="box">
+                <h3>quick links</h3>
+                <a href="#home"> <i class="fas fa-arrow-right"></i> home </a>
+                <a href="/api/cars"> <i class="fas fa-arrow-right"></i> Popular Cars </a>
+                <a href="#services"> <i class="fas fa-arrow-right"></i> services </a>
+                <a href="#newsletter"> <i class="fas fa-arrow-right"></i>Search Car </a>
+                <a href="#contact"> <i class="fas fa-arrow-right"></i> contact </a>
+            </div>
+
+            <div class="box">
+                <h3>contact info</h3>
+                <a href="#"> <i class="fas fa-phone"></i> +1(412)224-8598 </a>
+                <a href="#"> <i class="fas fa-phone"></i> +91 8887572168 </a>
+                <a href="#"> <i class="fas fa-envelope"></i> vinamra@gmail.com </a>
+                <a href="#"> <i class="fas fa-map-marker-alt"></i> Pittsburgh, Pennsylvania - 15213 </a>
+            </div>
+
+            <div class="box">
+                <h3>contact info</h3>
+                <a href="#"> <i class="fab fa-facebook-f"></i> facebook </a>
+                <a href="#"> <i class="fab fa-twitter"></i> twitter </a>
+                <a href="#"> <i class="fab fa-instagram"></i> instagram </a>
+                <a href="#"> <i class="fab fa-linkedin"></i> linkedin </a>
+                <a href="#"> <i class="fab fa-pinterest"></i> pinterest </a>
+            </div>
+
+
+
         </div>
 
-        <div class="box">
-            <i class="fas fa-headset"></i>
-            <h3>24/7 support</h3>
-            <p>Get round-the-clock assistance with our 24/7 support service—always here when you need us!</p>
-        </div>
+        <div class="credit"> created for INFSCI-2710 : TERM PROJECT | All Rights Reserved </div>
 
-    </div>
-
-</section>
-
-<section class="newsletter" id="newsletter">
-
-    <h3>Your next car, just a search away!</h3>
-    <p>Find your perfect car effortlessly — Use our smart search bar to explore options in seconds!</p>
-
-   <div>
-        <!-- Search Bar Input -->
-        <input type="text" id="search-query" placeholder="Search cars...">
-
-        <!-- Year Filter -->
-        <select id="year-filter">
-            <option value="">Select Year</option>
-            <option value="2020">2020</option>
-            <option value="2021">2021</option>
-            <option value="2022">2022</option>
-            <option value="2023">2023</option>
-            <option value="2024">2024</option>
-        </select>
-
-        <!-- Price Filter -->
-        <select id="price-filter">
-            <option value="">Select Price Range</option>
-            <option value="0-25000">Under $25,000</option>
-            <option value="25000-50000">$25,000 - $50,000</option>
-            <option value="50000-75000">$50,000 - $75,000</option>
-            <option value="75000-100000">Above $75,000</option>
-        </select>
-
-        <!-- Sale Filter Toggle -->
-        <label for="on-sale-filter">
-            <input type="checkbox" id="on-sale-filter">
-            Only show cars on sale
-        </label>
-
-        <!-- Replace the two buttons with a dropdown for sorting -->
-        <select id="price-sort" onchange="sortCars(this.value)">
-            <option value="">Sort by Price</option>
-            <option value="asc">Ascending</option>
-            <option value="desc">Descending</option>
-        </select>
-
-        <button onclick="searchCars()">Search</button>
-        <button class="clear-btn" onclick="clearSearch()">Clear Search</button>
-   </div>
-</section>
+    </section>
 
 
-<!-- Display Cars -->
-<div id="car-results"></div> <!-- Results will be displayed here -->
 
-<section class="contact" id="contact">
-
-    <h1 class="heading"><span>contact</span> us</h1>
-
-    <div class="row">
-
-        <iframe class="map" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3036.4474247369876!2d-79.95290792346155!3d40.44663597143837!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8834f229c4913a8f%3A0xc0c5df6e33fb0dbf!2s135%20N%20Bellefield%20Ave%2C%20Pittsburgh%2C%20PA%2015213!5e0!3m2!1sen!2sus!4v1701903072346!5m2!1sen!2sus" style="height: 400px;" allowfullscreen="" loading="lazy"></iframe>
-
-        <div class="info-box">
-            <h2>Address:</h2>
-            <h3>135 N Bellefield Ave, Pittsburgh, PA 15213</h3>
-            
-            <h2>Phone Number:</h2>
-            <h3>(412)-224-8598</h3>
-            
-            <h2>Sales Hours:</h2>
-            <h3>Mon-Fri: 9:00 AM - 8:00 PM</h3>
-            <h3>Sat: 9:00 AM - 5:00 PM</h3>
-            <h3>Sun: 9:00 AM - 5:00 PM</h3>
-        </div>
-
-    </div>
-
-</section>
-
-<section class="footer" id="footer">
-
-    <div class="box-container">
-
-        <div class="box">
-            <h3>our branches</h3>
-            <a href="#"> <i class="fas fa-map-marker-alt"></i> india </a>
-            <a href="#"> <i class="fas fa-map-marker-alt"></i> japan </a>
-            <a href="#"> <i class="fas fa-map-marker-alt"></i> france </a>
-            <a href="#"> <i class="fas fa-map-marker-alt"></i> russia </a>
-            <a href="#"> <i class="fas fa-map-marker-alt"></i> USA </a>
-        </div>
-
-        <div class="box">
-            <h3>quick links</h3>
-            <a href="#home"> <i class="fas fa-arrow-right"></i> home </a>
-            <a href="/api/cars"> <i class="fas fa-arrow-right"></i> Popular Cars </a>
-            <a href="#services"> <i class="fas fa-arrow-right"></i> services </a>
-            <a href="#newsletter"> <i class="fas fa-arrow-right"></i>Search Car </a>
-            <a href="#contact"> <i class="fas fa-arrow-right"></i> contact </a>
-        </div>
-
-        <div class="box">
-            <h3>contact info</h3>
-            <a href="#"> <i class="fas fa-phone"></i> +1(412)224-8598 </a>
-            <a href="#"> <i class="fas fa-phone"></i> +91 8887572168 </a>
-            <a href="#"> <i class="fas fa-envelope"></i> vinamra@gmail.com </a>
-            <a href="#"> <i class="fas fa-map-marker-alt"></i> Pittsburgh, Pennsylvania - 15213 </a>
-        </div>
-
-        <div class="box">
-            <h3>contact info</h3>
-            <a href="#"> <i class="fab fa-facebook-f"></i> facebook </a>
-            <a href="#"> <i class="fab fa-twitter"></i> twitter </a>
-            <a href="#"> <i class="fab fa-instagram"></i> instagram </a>
-            <a href="#"> <i class="fab fa-linkedin"></i> linkedin </a>
-            <a href="#"> <i class="fab fa-pinterest"></i> pinterest </a>
-        </div>
-
-    </div>
-
-    <div class="credit"> created for INFSCI-2710 : TERM PROJECT | All Rights Reserved </div>
-
-</section>
-
-
-<script>
+    <script>
         // Check if user is logged in using the global variable
         if (currentUser) {
             // Update navigation links
@@ -291,23 +305,24 @@
                 ordersLink.setAttribute("data-section", "orders");
                 ordersLink.innerHTML = `<a href="javascript:void(0);" onclick="showSection('orders')">Orders</a>`;
                 navLinks.insertBefore(ordersLink, usersLink.nextSibling); // Add after "Users"
-                }
-                }
+            }
+        }
 
-       // Initialize navbar on page load
-       window.addEventListener("DOMContentLoaded", () => {
+        // Initialize navbar on page load
+        window.addEventListener("DOMContentLoaded", () => {
             renderNavbar();
-            });
+        });
 
-       if (window.location.search.includes('error=1')) {
+        if (window.location.search.includes('error=1')) {
             document.querySelector('.error').classList.add('show');
         }
-</script>
-<script src="https://unpkg.com/swiper@7/swiper-bundle.min.js"></script>
+    </script>
+    <script src="https://unpkg.com/swiper@7/swiper-bundle.min.js"></script>
 
-<script src="/static/indexScript.js"></script>
+    <script src="/static/indexScript.js"></script>
 
-<script src="/static/script.js"></script>
+    <script src="/static/script.js"></script>
 
 </body>
+
 </html>

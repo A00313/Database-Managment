@@ -65,39 +65,39 @@ async function fetchCars() {
 }
 
 
-// Function to view detailed car information
 async function viewCarDetails(carId, carInvId) {
     try {
+        // Fetch car details from the API
         const response = await fetch(`http://127.0.0.1:5000/api/cars/${carId}`);
         const car = await response.json();
 
         if (car) {
-            // Check if the car has a sale price
+            let salePriceHtml = '';
+            let oldPriceHtml = '';
             let salePrice = car.price;
-            let originalPrice = car.price;  // Default to regular price
-            let salePriceHtml = '';  // HTML to display sale price if applicable
-            let oldPriceHtml = '';  // HTML to display original price with strikethrough if on sale
+            let originalPrice = car.price;
 
+            // Check for sale price if available
             try {
                 const saleResponse = await fetch(`http://127.0.0.1:5000/api/car_sale/${carInvId}`);
                 const saleData = await saleResponse.json();
-
                 if (saleData.campaign_price) {
-                    salePrice = saleData.campaign_price;  // Use the sale price if available
-                    oldPriceHtml = `<span class="old-price" style="text-decoration: line-through; color: grey;">$${originalPrice.toFixed(2)}</span>`;  // Strikethrough the original price
-                    salePriceHtml = `<span class="sale-price" style="color: red;">$${salePrice.toFixed(2)}</span>`;  // Display sale price in red
+                    salePrice = saleData.campaign_price;
+                    oldPriceHtml = `<span class="old-price">$${originalPrice.toFixed(2)}</span>`;
+                    salePriceHtml = `<span class="sale-price">$${salePrice.toFixed(2)}</span>`;
                 }
             } catch (error) {
-                console.log(`No sale found for car ${carInvId}`);
+                console.log(`Error fetching sale data for car ${carInvId}:`, error);
             }
 
-            // Display the car details with the updated price
+            // Display the car details inside the overlay
             const carDetailsDiv = document.getElementById('car-details');
             carDetailsDiv.innerHTML = `
                 <h2>${car.veh_name} - ${salePriceHtml || `$${salePrice.toFixed(2)}`}</h2>
-                ${oldPriceHtml}  <!-- Show the original price with strikethrough if on sale -->
+                ${oldPriceHtml}
                 <br>
                 <img src="${car.image_url}" alt="${car.veh_name}" class="car-image-large">
+                <p><strong>In Stock:</strong> ${car.inventory_count}</p>
                 <p><strong>Mileage:</strong> ${car.mileage} miles</p>
                 <p><strong>Color:</strong> ${car.ext_color}</p>
                 <p><strong>Engine:</strong> ${car.engine}</p>
@@ -105,10 +105,10 @@ async function viewCarDetails(carId, carInvId) {
                 <p><strong>Year:</strong> ${car.year}</p>
                 <p><strong>Location:</strong> ${car.location}</p>
                 <p><strong>Description:</strong> ${car.special_notes}</p>
-                <button onclick="closeCarDetails()">Close</button>
-                <button id="buy-button" onclick="proceedToPayment('${carInvId}', '${car.veh_name}', '${salePrice}')">Buy Now</button>
             `;
-            showSection('car-details-section');  // Show the details section
+
+            // Show the overlay and the car details
+            document.getElementById('overlay').style.display = 'flex';
         } else {
             alert('Car details not found.');
         }
@@ -117,6 +117,7 @@ async function viewCarDetails(carId, carInvId) {
         alert('Error fetching car details.');
     }
 }
+
 
 let currentCars = [];  // Global variable to store the current cars list
 
@@ -173,7 +174,7 @@ function displayCars(cars) {
 
         return `
             <div class="data-item" onclick="viewCarDetails('${car.veh_id}', '${car.veh_inv_id}')">
-                <img src="${car.image_url}" alt="${car.veh_name}">
+                <img src="${car.image_url}" alt="${car.veh_name}" class="car-image-large">
                 <h3>${car.veh_name}</h3>
                 ${oldPriceHtml}
                 <p>${salePriceHtml}</p>
@@ -209,16 +210,11 @@ function clearSearch() {
 }
 
 
-// Function to close the car details and return to the correct list
 function closeCarDetails() {
-
-    if (currentPage === 'products') {
-        showSection('products');  // Go back to the products page
-    }
-    else {
-        showSection('cars');  // Go back to the fetch cars page
-    }
+    // Hide the overlay
+    document.getElementById('overlay').style.display = 'none';
 }
+
 
 // Function that redirects to the payment page
 function proceedToPayment(id, name, price) {
