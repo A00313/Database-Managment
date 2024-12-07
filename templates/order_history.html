@@ -54,7 +54,7 @@
             {% for p in purchases %}
             <tr>
                 <td>{{ p.transaction_id }}</td>
-                <td>{{ p.year }} {{ p.vehicle }} ({{ p.color }})</td>
+                <td>{{p.quantity}} - {{ p.year }} {{ p.vehicle }} ({{ p.color }})</td>
                 <td>${{ p.price }}</td>
                 <td>{{ p.date }}</td>
             </tr>
