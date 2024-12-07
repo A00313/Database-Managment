@@ -105,6 +105,8 @@ async function viewCarDetails(carId, carInvId) {
                 <p><strong>Year:</strong> ${car.year}</p>
                 <p><strong>Location:</strong> ${car.location}</p>
                 <p><strong>Description:</strong> ${car.special_notes}</p>
+                <button class="btn" onclick="closeCarDetails()">Close</button>
+                <button class="btn" id="buy-button" onclick="proceedToPayment('${carInvId}', '${car.veh_name}', '${salePrice}')">Buy Now</button>
             `;
 
             // Show the overlay and the car details
