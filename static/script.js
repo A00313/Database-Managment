@@ -117,8 +117,9 @@ async function viewCarDetails(carId, carInvId) {
         alert('Error fetching car details.');
     }
 }
-let allCars = [];  // Global variable to store fetched cars
-let saleCars = [];  // Store cars with sale prices (for "on sale" filter)
+
+
+let currentCars = [];  // Global variable to store the current cars list
 
 // Function to handle search cars
 async function searchCars() {
@@ -127,40 +128,24 @@ async function searchCars() {
     const query = document.getElementById('search-query').value.trim().toLowerCase();
     const selectedYear = document.getElementById('year-filter').value;
     const selectedPriceRange = document.getElementById('price-filter').value;
-    const isOnSale = document.getElementById('on-sale-filter').checked;  // Get the status of the "on sale" toggle
+    // const isOnSale = document.getElementById('on-sale-filter').checked;  // Get the status of the "on sale" toggle
 
     const carResultsDiv = document.getElementById('car-results');
     carResultsDiv.innerHTML = '';  // Clear current car list
 
-    if (query === '' && selectedYear === '' && selectedPriceRange === '' && !isOnSale) {
+    if (query === '' && selectedYear === '' && selectedPriceRange === '') {
         carResultsDiv.innerHTML = '<p>Please enter a search term or select filters.</p>';
         return;
     }
 
     try {
-        // Fetch the cars based on the search query and filters (excluding sale status initially)
+        // Include the sale filter in the query string
         const response = await fetch(`http://127.0.0.1:5000/api/cars/search?query=${encodeURIComponent(query)}&year=${encodeURIComponent(selectedYear)}&price_range=${encodeURIComponent(selectedPriceRange)}`);
         const cars = await response.json();
 
         if (cars.length > 0) {
-            allCars = cars;  // Store the fetched cars in the global variable
-
-            // Ensure sale price is populated in each car object if it exists
-            allCars.forEach(car => {
-                if (car.sale_price && !isNaN(car.sale_price)) {
-                    car.campaignPrice = car.sale_price;  // Add sale price directly to the car object
-                }
-            });
-
-            // Filter sale cars based on sale price availability
-            saleCars = allCars.filter(car => car.campaignPrice && !isNaN(car.campaignPrice));
-
-            // If "on sale" filter is active, only display cars with sale prices
-            if (isOnSale) {
-                displayCars(saleCars);
-            } else {
-                displayCars(allCars);
-            }
+            currentCars = cars;  // Store the fetched cars in the global variable
+            displayCars(cars);
         } else {
             carResultsDiv.innerHTML = '<p>No cars found matching your query.</p>';
         }
@@ -173,28 +158,23 @@ async function searchCars() {
 // Function to display car cards
 function displayCars(cars) {
     const carResultsDiv = document.getElementById('car-results');
-    carResultsDiv.innerHTML = '';  // Clear the current results
-
-    cars.slice(0, 5).forEach(car => {
+    carResultsDiv.innerHTML = cars.slice(0, 5).map(car => {
         let salePriceHtml = '';
         let oldPriceHtml = '';
         if (!car || !car.price || isNaN(car.price)) {
             console.warn('Invalid car data:', car);
-            return;
+            return '';
         }
-
-        // If the car has a sale price, display it with the old price
-        if (car.campaignPrice) {
-            salePriceHtml = `<span class="sale-price" style="color: red;">$${car.campaignPrice.toFixed(2)}</span>`;
+        if (car.sale_price) {
+            salePriceHtml = `<span class="sale-price" style="color: red;">$${car.sale_price.toFixed(2)}</span>`;
             oldPriceHtml = `<span class="old-price" style="text-decoration: line-through; color: grey;">$${car.price.toFixed(2)}</span>`;
         } else {
-            // Otherwise, just show the regular price
             salePriceHtml = `$${car.price.toFixed(2)}`;
         }
 
-        carResultsDiv.innerHTML += `
+        return `
             <div class="data-item" onclick="viewCarDetails('${car.veh_id}', '${car.veh_inv_id}')">
-                <img src="${car.image_url}" alt="${car.veh_name}" class="car-image-large">
+                <img src="${car.image_url}" alt="${car.veh_name}" class="car-image-small">
                 <h3>${car.veh_name}</h3>
                 ${oldPriceHtml}
                 <p>${salePriceHtml}</p>
@@ -204,20 +184,20 @@ function displayCars(cars) {
                 <p>Horsepower: ${car.horsepower} hp</p>
             </div>
         `;
-    });
+    }).join('');
 }
 
-// Function to sort the cars by price (ascending or descending)
+// Function to sort the cars array based on price
 function sortCars(order) {
-    let sortedCars = [...allCars];  // Clone the cars array to avoid modifying the original
+    // If no option is selected, return and do nothing
+    if (!order) return;
 
     if (order === 'asc') {
-        sortedCars.sort((a, b) => a.price - b.price);  // Sort in ascending order
+        currentCars.sort((a, b) => a.price - b.price);  // Sort ascending by price
     } else if (order === 'desc') {
-        sortedCars.sort((a, b) => b.price - a.price);  // Sort in descending order
+        currentCars.sort((a, b) => b.price - a.price);  // Sort descending by price
     }
-
-    displayCars(sortedCars);  // Re-render the sorted cars
+    displayCars(currentCars);  // Re-render the sorted cars
 }
 
 // Function to clear search input and filters
@@ -225,24 +205,10 @@ function clearSearch() {
     document.getElementById('search-query').value = '';
     document.getElementById('year-filter').value = '';
     document.getElementById('price-filter').value = '';
-    document.getElementById('on-sale-filter').checked = false;  // Clear the "on sale" toggle
+    // document.getElementById('on-sale-filter').checked = false;  // Clear the "on sale" toggle
     document.getElementById('car-results').innerHTML = '';
 }
 
-
-
-// // Function to sort the cars array based on price
-// function sortCars(order) {
-//     // If no option is selected, return and do nothing
-//     if (!order) return;
-
-//     if (order === 'asc') {
-//         currentCars.sort((a, b) => a.price - b.price);  // Sort ascending by price
-//     } else if (order === 'desc') {
-//         currentCars.sort((a, b) => b.price - a.price);  // Sort descending by price
-//     }
-//     displayCars(currentCars);  // Re-render the sorted cars
-// }
 
 function closeCarDetails() {
     // Hide the overlay
