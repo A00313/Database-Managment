@@ -281,6 +281,11 @@
                     <option value="asc">Ascending</option>
                     <option value="desc">Descending</option>
                 </select>
+                        <!-- Checkbox to filter by sale price -->
+                <div>
+                    <label for="showSaleOnly">Show On Sale Cars Only:</label>
+                    <input type="checkbox" id="showSaleOnly" onchange="filterCarsBySalePrice()">
+                </div>
             </div>
             <h1>Available Cars</h1>
             <div id="car-list"></div>
@@ -421,16 +426,19 @@
                 });
             }
 
+            let filteredCars = [];  // This will store the cars after applying filters
+    
             // Function to fetch cars from the API
             async function fetchCars() {
                 try {
                     const response = await fetch('http://127.0.0.1:5000/api/cars');
                     const cars = await response.json();
-
+    
                     if (Array.isArray(cars) && cars.length > 0) {
                         allCars = cars;  // Store the fetched cars
-                        await fetchSaleData();  // Fetch the sale data
-                        displayCars(allCars);  // Display cars after sale data is fetched
+                        await fetchSaleData();  // Fetch the sale data and update cars with sale prices
+                        filteredCars = [...allCars];  // Initially, all cars are displayed
+                        displayCars(filteredCars);  // Display cars after sale data is fetched
                     } else {
                         document.getElementById('car-list').innerHTML = '<p>No cars available at the moment.</p>';
                     }
@@ -439,7 +447,7 @@
                     document.getElementById('car-list').innerHTML = `<p class="error">Error fetching cars: ${error.message}</p>`;
                 }
             }
-
+    
             // Fetch sale data (campaign price) for each car
             async function fetchSaleData() {
                 // Fetch sale prices for each car and update the car objects
@@ -448,38 +456,46 @@
                         const saleResponse = await fetch(`http://127.0.0.1:5000/api/car_sale/${car.veh_inv_id}`);
                         const saleData = await saleResponse.json();
                         if (saleData.campaign_price && !isNaN(saleData.campaign_price)) {
-                            car.campaignPrice = saleData.campaign_price;
+                            car.campaignPrice = saleData.campaign_price;  // Add campaign price to car object
                         }
                     } catch (error) {
                         console.error(`Error fetching sale data for ${car.veh_inv_id}:`, error);
                     }
                 });
-
+    
                 // Wait for all sale data fetches to complete
                 await Promise.all(salePromises);
             }
-
+    
             // Function to display the list of cars
             function displayCars(cars) {
                 const carListDiv = document.getElementById('car-list');
                 carListDiv.innerHTML = '';  // Clear current car list
-
+    
+                if (cars.length === 0) {
+                    carListDiv.innerHTML = '<p>No cars available matching the filter criteria.</p>';
+                    return;
+                }
+    
                 cars.forEach(car => {
                     let salePriceHtml = '';
                     let oldPriceHtml = '';
-
+    
+                    // Ensure car has a valid price before proceeding
                     if (!car || !car.price || isNaN(car.price)) {
                         console.warn('Invalid car data:', car);
                         return;
                     }
-
+    
+                    // Check if the car has a campaign price (sale price)
                     if (car.campaignPrice) {
                         salePriceHtml = `<div class="sale-price">$${car.campaignPrice.toFixed(2)}</div>`;
                         oldPriceHtml = `<div class="old-price">$${car.price.toFixed(2)}</div>`;
                     } else {
                         salePriceHtml = `<div class="price">$${car.price.toFixed(2)}</div>`;
                     }
-
+    
+                    // Create the car card and append it to the car list
                     const carCard = `
                         <div class="car-card" onclick="viewCarDetails('${car.veh_id}', '${car.veh_inv_id}')">
                             <img src="${car.image_url}" alt="${car.veh_name}">
@@ -497,33 +513,48 @@
                     carListDiv.innerHTML += carCard;
                 });
             }
-
+    
+            // Function to filter cars by sale price (if checkbox is checked)
+            function filterCarsBySalePrice() {
+                const showSaleOnly = document.getElementById('showSaleOnly').checked;
+    
+                // Filter cars based on the sale price
+                if (showSaleOnly) {
+                    filteredCars = allCars.filter(car => car.campaignPrice);
+                } else {
+                    filteredCars = [...allCars];
+                }
+    
+                // Re-render the filtered cars
+                displayCars(filteredCars);
+            }
+    
             // Function to sort the cars by price (ascending or descending)
             function sortCars(order) {
-                let sortedCars = [...allCars];  // Clone the cars array to avoid modifying the original
-
+                let sortedCars = [...filteredCars];  // Clone the filtered cars array to avoid modifying the original
+    
                 if (order === 'asc') {
-                    sortedCars.sort((a, b) => a.price - b.price);  // Sort in ascending order
+                    sortedCars.sort((a, b) => (a.campaignPrice || a.price) - (b.campaignPrice || b.price));  // Sort by price or campaign price
                 } else if (order === 'desc') {
-                    sortedCars.sort((a, b) => b.price - a.price);  // Sort in descending order
+                    sortedCars.sort((a, b) => (b.campaignPrice || b.price) - (a.campaignPrice || a.price));  // Sort by price or campaign price in reverse order
                 }
-
+    
                 displayCars(sortedCars);  // Re-render the sorted cars
             }
-
+    
             // Function to view car details
             async function viewCarDetails(carId, carInvId) {
                 try {
                     currentCarInvId = carInvId;
                     const response = await fetch(`http://127.0.0.1:5000/api/cars/${carId}`);
                     const car = await response.json();
-
+    
                     if (car) {
-                        let salePrice = car.price;
-                        let originalPrice = car.price;
                         let salePriceHtml = '';
                         let oldPriceHtml = '';
-
+                        let salePrice = car.price;  // Default price is the regular price
+                        let originalPrice = car.price;
+    
                         try {
                             const saleResponse = await fetch(`http://127.0.0.1:5000/api/car_sale/${carInvId}`);
                             const saleData = await saleResponse.json();
@@ -553,7 +584,7 @@
                             <button class="btn" onclick="closeCarDetails()">Close</button>
                             <button class="btn" id="buy-button" onclick="proceedToPayment('${carInvId}', '${car.veh_name}', '${salePrice}')">Buy Now</button>
                         `;
-
+    
                         document.getElementById('car-details-section').style.display = 'block';
                         document.getElementById('overlay').style.display = 'block';
                         document.getElementById('user-review-form').style.display = 'block';
@@ -566,18 +597,18 @@
                     alert('Error fetching car details.');
                 }
             }
-
+    
             // Function to close the car details modal
             function closeCarDetails() {
                 document.getElementById('car-details-section').style.display = 'none';
                 document.getElementById('overlay').style.display = 'none';
             }
-
+    
             // Function to proceed to the payment page
             function proceedToPayment(id, name, price) {
                 window.location.href = `/payment?car_id=${id}&car_name=${encodeURIComponent(name)}&car_price=${encodeURIComponent(price)}`;
             }
-
+    
             // Fetch cars when the page loads
             window.onload = fetchCars;
 
@@ -655,7 +686,7 @@
                 }
             });
         </script>
-
+    
     </body>
 
 </html>
