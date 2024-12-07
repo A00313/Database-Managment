@@ -289,12 +289,137 @@
         <!-- Full-Screen Modal for Car Details -->
         <div id="overlay" onclick="closeCarDetails()"></div>
 
-        <div id="car-details-section">
-            <div id="car-details" class="car-details-card"></div>
+        <div id="car-details-section" onclick="if(event.target === this) closeCarDetails()">
+            <div id="car-details" class="car-details-card">
+                <div id="car-info">
+                    <!-- Car details will be inserted here by JavaScript -->
+                </div>
+                <div id="reviews-container">
+                    <div id="reviews-section">
+                        <h3>Customer Reviews</h3>
+                        <div id="reviews-list"></div>
+                    </div>
+                    <div id="user-review-form" style="display: none;">
+                        <h3>Submit Your Review</h3>
+                        <div id="star-rating">
+                            <span class="star" data-value="1">&#9733;</span>
+                            <span class="star" data-value="2">&#9733;</span>
+                            <span class="star" data-value="3">&#9733;</span>
+                            <span class="star" data-value="4">&#9733;</span>
+                            <span class="star" data-value="5">&#9733;</span>
+                        </div>
+                        <textarea id="review-text" placeholder="Write your review..." rows="4"></textarea>
+                        <button onclick="submitReview()">Submit Review</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <style>
+            #star-rating .star {
+                font-size: 24px;
+                color: #ccc;
+                cursor: pointer;
+            }
+            #star-rating .star.selected {
+                color: #ffd700;
+            }
+            #reviews-list {
+                margin-top: 20px;
+                padding: 10px;
+                border: 1px solid #ddd;
+                background: #f9f9f9;
+            }
+            .review-item {
+                margin-bottom: 15px;
+                border-bottom: 1px solid #ddd;
+                padding-bottom: 10px;
+            }
+            .review-rating {
+                font-size: 1.5em;
+            }
+            .review-text {
+                font-size: 1.2em;
+            }
+            #reviews-section {
+                width: 400px;
+                max-height: 300px;
+                overflow-y: auto;
+                margin-top: 20px;
+                padding: 15px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+            }
+            #user-review-form {
+                width: 400px;
+                padding: 15px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                margin-top: 10px;
+            }
+            #review-text {
+                width: 100%;
+                max-width: 370px;
+                resize: vertical;
+                max-height: 100px;
+            }
+            .car-image-large {
+                width: 400px;
+                height: 300px;
+                object-fit: cover;
+                border-radius: 8px;
+            }
+            .review-item {
+                margin-bottom: 15px;
+                padding-bottom: 10px;
+                border-bottom: 1px solid #ddd;
+            }
+            .review-rating {
+                color: #ffd700;
+                font-size: 1.2em;
+                margin: 5px 0;
+            }
+            .review-text {
+                margin: 5px 0;
+                font-size: 0.9em;
+            }
+            #car-details {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                justify-content: center;
+                padding: 20px;
+            }
+            #car-info {
+                flex: 1;
+                min-width: 300px;
+                max-width: 500px;
+            }
+            #reviews-container {
+                flex: 1;
+                min-width: 300px;
+                max-width: 400px;
+            }
+        </style>
         </div>
 
         <script>
             let allCars = [];  // Global variable to store fetched cars
+            let selectedRating = 0;
+            let currentCarInvId; // Store current car inventory ID
+
+            function initializeStars() {
+                const stars = document.querySelectorAll('#star-rating .star');
+                stars.forEach(star => {
+                    star.addEventListener('click', () => {
+                        selectedRating = parseInt(star.dataset.value);
+                        stars.forEach(s => s.classList.remove('selected'));
+                        for (let i = 0; i < selectedRating; i++) {
+                            stars[i].classList.add('selected');
+                        }
+                    });
+                });
+            }
 
             // Function to fetch cars from the API
             async function fetchCars() {
@@ -389,14 +514,15 @@
             // Function to view car details
             async function viewCarDetails(carId, carInvId) {
                 try {
+                    currentCarInvId = carInvId;
                     const response = await fetch(`http://127.0.0.1:5000/api/cars/${carId}`);
                     const car = await response.json();
 
                     if (car) {
-                        let salePriceHtml = '';
-                        let oldPriceHtml = '';
                         let salePrice = car.price;
                         let originalPrice = car.price;
+                        let salePriceHtml = '';
+                        let oldPriceHtml = '';
 
                         try {
                             const saleResponse = await fetch(`http://127.0.0.1:5000/api/car_sale/${carInvId}`);
@@ -410,7 +536,7 @@
                             console.log(`Error fetching sale data for car ${carInvId}:`, error);
                         }
 
-                        const carDetailsDiv = document.getElementById('car-details');
+                        const carDetailsDiv = document.getElementById('car-info');
                         carDetailsDiv.innerHTML = `
                             <h2>${car.veh_name} - ${salePriceHtml || `$${salePrice.toFixed(2)}`}</h2>
                             ${oldPriceHtml}
@@ -430,6 +556,8 @@
 
                         document.getElementById('car-details-section').style.display = 'block';
                         document.getElementById('overlay').style.display = 'block';
+                        document.getElementById('user-review-form').style.display = 'block';
+                        fetchReviews(carInvId);
                     } else {
                         alert('Car details not found.');
                     }
@@ -452,6 +580,80 @@
 
             // Fetch cars when the page loads
             window.onload = fetchCars;
+
+            async function fetchReviews(vehInvId) {
+                try {
+                    const response = await fetch(`/api/reviews/${vehInvId}`);
+                    const reviews = await response.json();
+                    const reviewsList = document.getElementById('reviews-list');
+                    reviewsList.innerHTML = ''; // Clear previous content
+
+                    if (reviews.length === 0) {
+                        reviewsList.innerHTML = '<p>No reviews yet. Be the first to review this car!</p>';
+                        return;
+                    }
+
+                    reviews.forEach(review => {
+                        const reviewItem = document.createElement('div');
+                        reviewItem.classList.add('review-item');
+                        const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+                        reviewItem.innerHTML = `
+                            <strong>${review.reviewer_name || 'Anonymous'}</strong> - ${new Date(review.review_date).toLocaleDateString()}<br>
+                            <div class="review-rating">${stars}</div>
+                            <p class="review-text">${review.review_text || 'No comments'}</p>
+                        `;
+                        reviewsList.appendChild(reviewItem);
+                    });
+                } catch (error) {
+                    console.error('Error fetching reviews:', error);
+                    reviewsList.innerHTML = `<p class="error">Error fetching reviews: ${error.message}</p>`;
+                }
+            }
+
+            async function submitReview() {
+                const reviewText = document.getElementById('review-text').value;
+                if (!selectedRating) {
+                    alert('Please select a rating.');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/review', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            veh_inv_id: currentCarInvId,
+                            rating: selectedRating,
+                            review_text: reviewText
+                        }),
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('Review submitted successfully.');
+                        document.getElementById('review-text').value = ''; // Clear the review text
+                        selectedRating = 0; // Reset rating
+                        const stars = document.querySelectorAll('#star-rating .star');
+                        stars.forEach(s => s.classList.remove('selected')); // Reset stars
+                        fetchReviews(currentCarInvId); // Refresh reviews with the correct ID
+                    } else {
+                        alert(result.error || 'Error submitting review.');
+                    }
+                } catch (error) {
+                    console.error('Error submitting review:', error);
+                    alert('Error submitting review. Please try again.');
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                initializeStars();
+                const loggedIn = true; // Replace with actual login state
+                if (loggedIn) {
+                    document.getElementById('user-review-form').style.display = 'block';
+                }
+            });
         </script>
 
     </body>

@@ -109,6 +109,10 @@ def init_db():
         DROP TABLE IF EXISTS purchases
     ''')
 
+    cursor.execute('''
+        DROP TABLE IF EXISTS cust_reviews
+    ''')
+
     # Create employee information table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS emp_info
@@ -354,6 +358,20 @@ def init_db():
             ('TG2024', 'INV017', round(55999.99 * 0.85, 2)),
             ('TG2024', 'INV018', round(21999.99 * 0.85, 2))
         ])
+
+    # Create cust_reviews  table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS cust_reviews  (
+           review_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            cust_id VARCHAR(10),
+            veh_inv_id VARCHAR(10),
+            rating INTEGER NOT NULL CHECK(rating BETWEEN 1 AND 5),
+            review_text TEXT,
+            review_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (cust_id) REFERENCES cust_info(cust_id),
+            FOREIGN KEY (veh_inv_id) REFERENCES veh_inv(veh_inv_id)
+        )
+    ''')
 
     conn.commit()
     conn.close()
@@ -916,6 +934,61 @@ def order_history():
     conn.close()
     
     return render_template('order_history.html', purchases=purchases)
+
+
+@app.route('/api/reviews/<veh_inv_id>', methods=['GET'])
+def get_reviews(veh_inv_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    reviews = cursor.execute('''
+        SELECT r.review_id, r.rating, r.review_text, r.review_date,
+               c.f_name || " " || c.l_name AS reviewer_name
+        FROM cust_reviews r 
+        JOIN cust_info c ON r.cust_id = c.login_id 
+        WHERE r.veh_inv_id = ?
+        ORDER BY r.review_date DESC
+        ''',
+        (veh_inv_id,)
+    ).fetchall()
+    
+    conn.close()
+    
+    return jsonify([{
+        'review_id': r['review_id'],
+        'rating': r['rating'],
+        'review_text': r['review_text'],
+        'review_date': r['review_date'],
+        'reviewer_name': r['reviewer_name']
+    } for r in reviews])
+
+@app.route('/api/review', methods=['POST'])
+def submit_review():
+    if current_user_id is None:
+        return jsonify({'error': 'Please log in to submit a review'}), 401
+
+    data = request.get_json()
+    veh_inv_id = data.get('veh_inv_id')
+    rating = data.get('rating')
+    review_text = data.get('review_text')
+
+    if not all([veh_inv_id, rating]):
+        return jsonify({'success': False, 'error': 'Missing required fields'}), 400
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Insert the review
+        cursor.execute('''
+            INSERT INTO cust_reviews (cust_id, veh_inv_id, rating, review_text, review_date)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (current_user_id, veh_inv_id, rating, review_text, datetime.now()))
+        
+        conn.commit()
+        conn.close()
+    except:
+        return jsonify({'success': False, 'error': 'Error submitting review'}), 500
+    return jsonify({'success': True})
 
 if __name__ == '__main__':
     init_db()  # Initialize the database with tables and data
